@@ -1,69 +1,66 @@
-import Image from "next/image";
+import Link from "next/link";
+
+const WEEKS = [
+  { n: 1, label: "CBOR schema & types" },
+  { n: 2, label: "Test PKI chain (CVCA→DV→Terminal)" },
+  { n: 3, label: "Android HCE service (hexa-tag)" },
+  { n: 4, label: "PKI auth handshake (auth-gated read)" },
+  { n: 5, label: "Rekor transparency log + enrollment CLI" },
+  { n: 6, label: "FastAPI backend (profile store, GDPR delete)" },
+  { n: 7, label: "Chip A ring-only profile + E2E integration test" },
+];
+
+const CURRENT = ["Android transport abstraction", "Robolectric CI", "Team site"];
+
+const CARDS = [
+  { href: "/model",     label: "3D Model",   desc: "Interactive assembly, ring, core, exploded and worn scenes" },
+  { href: "/decisions", label: "Decisions",  desc: "40 architecture decision records with status and principles" },
+  { href: "/setup",     label: "Setup",      desc: "Physical NFC testing, local backend, protocol test suite" },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="max-w-5xl mx-auto px-4 py-12 w-full">
+      <div className="mb-12">
+        <h1 className="text-4xl font-mono font-bold text-zinc-100 mb-2">Hexa</h1>
+        <p className="text-lg text-amber-400 font-mono mb-6">Digital identification for the field</p>
+        <p className="text-zinc-400 max-w-2xl leading-relaxed">
+          Hexa is a hexagonal NFC tag carrying a signed medical profile, PKI-authenticated reader
+          access, and a tamper-evident transparency log. The ring stays with the casualty; the core
+          travels to records.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-14">
+        {CARDS.map(c => (
+          <Link key={c.href} href={c.href}
+            className="block border border-zinc-800 bg-zinc-900 p-5 hover:border-zinc-600 transition-colors">
+            <div className="font-mono font-semibold text-zinc-100 mb-1">{c.label}</div>
+            <div className="text-sm text-zinc-400">{c.desc}</div>
+          </Link>
+        ))}
+      </div>
+
+      <div>
+        <h2 className="font-mono text-xs text-zinc-500 uppercase tracking-widest mb-4">Build status</h2>
+        <div className="space-y-2 mb-6">
+          {WEEKS.map(w => (
+            <div key={w.n} className="flex items-center gap-3">
+              <span className="font-mono text-xs text-zinc-500 w-14 shrink-0">Week {w.n}</span>
+              <span className="inline-block w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+              <span className="text-sm text-zinc-300 font-mono">{w.label}</span>
+            </div>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div>
+          <div className="font-mono text-xs text-zinc-500 uppercase tracking-widest mb-2">In progress</div>
+          <div className="flex flex-wrap gap-2">
+            {CURRENT.map(s => (
+              <span key={s} className="border border-zinc-700 text-zinc-400 text-xs font-mono px-2 py-0.5">{s}</span>
+            ))}
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
