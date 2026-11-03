@@ -57,7 +57,12 @@ export default function ModelPage() {
           alt={`Hexa tag — ${scene}`}
           camera-controls={true}
           auto-rotate={true}
-          shadow-intensity="1"
+          auto-rotate-delay={2000}
+          rotation-per-second="20deg"
+          environment-image="neutral"
+          shadow-intensity="2"
+          shadow-softness="0.8"
+          exposure="1.1"
           style={{ width: '100%', flex: 1, background: '#09090b' }}
           onError={() => setMissing(true)}
         />
