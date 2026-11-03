@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -20,8 +18,7 @@ export default function LoginPage() {
     })
     setLoading(false)
     if (res.ok) {
-      router.push('/')
-      router.refresh()
+      window.location.href = '/'
     } else {
       setError(true)
     }
