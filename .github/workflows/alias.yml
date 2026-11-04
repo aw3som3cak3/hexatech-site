@@ -1,0 +1,20 @@
+name: Update hexatech-hexa.vercel.app alias
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  alias:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel deployment to finish
+        run: sleep 90
+
+      - name: Re-point alias to latest production
+        run: >
+          npx vercel alias set
+          hexatech-hexa-eriks-projects-fd2ef1a9.vercel.app
+          hexatech-hexa.vercel.app
+          --token ${{ secrets.VERCEL_TOKEN }}
+          --yes
