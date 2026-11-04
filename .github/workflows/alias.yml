@@ -17,4 +17,3 @@ jobs:
           hexatech-hexa-eriks-projects-fd2ef1a9.vercel.app
           hexatech-hexa.vercel.app
           --token ${{ secrets.VERCEL_TOKEN }}
-          --yes
