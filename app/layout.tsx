@@ -8,6 +8,8 @@ import "./globals.css";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Hexa — Digital identification for the field",
   description: "Hexagonal NFC dogtag with PKI-authenticated medical profile and transparency log.",
