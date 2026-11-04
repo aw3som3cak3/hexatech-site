@@ -1,6 +1,7 @@
 'use client'
 // 3D viewer using Google model-viewer web component with GLTF files exported from build123d.
-// Generate models: cd hexatech-tag-cad && .\make.ps1 gltf → copy out/gltf/*.gltf to public/models/
+// Generate models: cd hexatech-tag-cad && .\make.ps1 gltf && python tools/hexarender.py --push
+// (hexarender --push copies both *.gltf and *.bin to public/models/)
 // Generate renders: cd hexatech-tag-cad && .venv\Scripts\python tools/hexarender.py --skriv --push
 
 import Script from 'next/script'
