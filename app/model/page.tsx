@@ -11,12 +11,13 @@ import { useState, createElement } from 'react'
 const ModelViewer = (props: Record<string, unknown>) => createElement('model-viewer', props)
 
 const SCENES = [
-  { id: 'assembly', label: 'Assembly' },
-  { id: 'ring',     label: 'Ring' },
-  { id: 'core',     label: 'Core' },
-  { id: 'exploded', label: 'Exploded' },
-  { id: 'worn',     label: 'Worn (chain)' },
-  { id: 'renders',  label: 'Renders' },
+  { id: 'assembly',     label: 'Assembly' },
+  { id: 'ring',         label: 'Ring' },
+  { id: 'core',         label: 'Core' },
+  { id: 'exploded',     label: 'Exploded' },
+  { id: 'worn',         label: 'Worn (chain)' },
+  { id: 'electronics',  label: 'Electronics' },
+  { id: 'renders',      label: 'Renders' },
 ]
 
 const RENDERS = [
