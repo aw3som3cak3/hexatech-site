@@ -11,14 +11,36 @@ import { useState, createElement } from 'react'
 // model-viewer is a custom element — use createElement to avoid JSX type errors
 const ModelViewer = (props: Record<string, unknown>) => createElement('model-viewer', props)
 
-const SCENES = [
-  { id: 'assembly',     label: 'Assembly' },
-  { id: 'ring',         label: 'Ring' },
-  { id: 'core',         label: 'Core' },
-  { id: 'exploded',     label: 'Exploded' },
-  { id: 'worn',         label: 'Worn (chain)' },
-  { id: 'electronics',  label: 'Electronics' },
-  { id: 'renders',      label: 'Renders' },
+const SCENE_GROUPS = [
+  {
+    label: 'Ring & Core',
+    scenes: [
+      { id: 'assembly',      label: 'Assembly' },
+      { id: 'ring',          label: 'Ring' },
+      { id: 'core',          label: 'Core' },
+      { id: 'exploded',      label: 'Exploded' },
+      { id: 'worn',          label: 'Worn' },
+      { id: 'electronics',   label: 'Electronics' },
+      { id: 'chain-hardware',label: 'Chain hw.' },
+    ],
+  },
+  {
+    label: 'Card Design',
+    scenes: [
+      { id: 'card-nfc',      label: 'NFC Card' },
+      { id: 'card-tearaway', label: 'Tear-away' },
+      { id: 'card-assembly', label: 'Card + Surround' },
+      { id: 'card-full',     label: 'Full Set' },
+      { id: 'card-worn',     label: 'Worn' },
+      { id: 'card-grommet',  label: 'Grommet' },
+    ],
+  },
+  {
+    label: null,
+    scenes: [
+      { id: 'renders', label: 'Renders' },
+    ],
+  },
 ]
 
 const RENDERS = [
@@ -36,19 +58,29 @@ export default function ModelPage() {
         type="module"
         src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
       />
-      <nav className="flex gap-2 p-3 bg-zinc-900 border-b border-zinc-800 overflow-x-auto shrink-0">
-        {SCENES.map(s => (
-          <button
-            key={s.id}
-            onClick={() => { setScene(s.id); setMissing(false) }}
-            className={`px-3 py-1 text-sm font-mono whitespace-nowrap transition-colors ${
-              scene === s.id
-                ? 'bg-zinc-100 text-zinc-900'
-                : 'text-zinc-400 hover:text-zinc-100'
-            }`}
-          >
-            {s.label}
-          </button>
+      <nav className="flex flex-wrap gap-y-1 p-3 bg-zinc-900 border-b border-zinc-800 overflow-x-auto shrink-0 items-center">
+        {SCENE_GROUPS.map((group, gi) => (
+          <div key={group.label ?? 'misc'} className="flex items-center gap-1">
+            {gi > 0 && <span className="mx-2 text-zinc-700 select-none">|</span>}
+            {group.label && (
+              <span className="text-xs font-mono text-zinc-600 mr-1 select-none whitespace-nowrap">
+                {group.label}:
+              </span>
+            )}
+            {group.scenes.map(s => (
+              <button
+                key={s.id}
+                onClick={() => { setScene(s.id); setMissing(false) }}
+                className={`px-3 py-1 text-sm font-mono whitespace-nowrap transition-colors ${
+                  scene === s.id
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-400 hover:text-zinc-100'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
         ))}
       </nav>
 
