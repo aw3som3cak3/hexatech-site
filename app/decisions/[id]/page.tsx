@@ -31,7 +31,7 @@ export default async function AdrPage({ params }: { params: Promise<{ id: string
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 w-full">
       <div className="flex items-center justify-between mb-6">
-        <a href="/decisions" className="text-zinc-500 hover:text-zinc-300 font-mono text-sm">← Decisions</a>
+        <a href="/decisions" className="text-zinc-500 hover:text-zinc-300 font-mono text-sm">← Architecture</a>
         <CopyButton text={raw} />
       </div>
       <article

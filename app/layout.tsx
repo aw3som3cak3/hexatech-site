@@ -27,7 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <>
                 <div className="flex gap-4 ml-auto overflow-x-auto">
                   <Link href="/model"          className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors font-mono whitespace-nowrap">Model</Link>
-                  <Link href="/decisions"      className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors font-mono whitespace-nowrap">Decisions</Link>
+                  <Link href="/decisions"      className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors font-mono whitespace-nowrap">Architecture</Link>
                   <Link href="/principles"     className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors font-mono whitespace-nowrap">Principles</Link>
                   <Link href="/open-questions" className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors font-mono whitespace-nowrap">Questions</Link>
                   <Link href="/setup"          className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors font-mono whitespace-nowrap">Setup</Link>

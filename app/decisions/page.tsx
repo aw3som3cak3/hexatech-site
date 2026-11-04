@@ -23,7 +23,7 @@ export default function DecisionsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 w-full">
       <div className="flex items-start justify-between mb-1 gap-4">
-        <h1 className="font-mono font-bold text-2xl text-zinc-100">Decision log</h1>
+        <h1 className="font-mono font-bold text-2xl text-zinc-100">Architectural description</h1>
         <CopyButton text={fullContext} label="Copy all context for agent" />
       </div>
       <p className="text-zinc-500 text-sm mb-6">
