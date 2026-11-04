@@ -1,8 +1,10 @@
 'use client'
 // 3D viewer using Google model-viewer web component with GLTF files exported from build123d.
 // Generate models: cd hexatech-tag-cad && .\make.ps1 gltf → copy out/gltf/*.gltf to public/models/
+// Generate renders: cd hexatech-tag-cad && .venv\Scripts\python tools/hexarender.py --skriv --push
 
 import Script from 'next/script'
+import Image from 'next/image'
 import { useState, createElement } from 'react'
 
 // model-viewer is a custom element — use createElement to avoid JSX type errors
@@ -14,6 +16,12 @@ const SCENES = [
   { id: 'core',     label: 'Core' },
   { id: 'exploded', label: 'Exploded' },
   { id: 'worn',     label: 'Worn (chain)' },
+  { id: 'renders',  label: 'Renders' },
+]
+
+const RENDERS = [
+  { src: '/renders/hexa-assembly.png', label: 'Assembly — 3/4 view' },
+  { src: '/renders/hexa-worn.png',     label: 'Worn on chain' },
 ]
 
 export default function ModelPage() {
@@ -42,7 +50,23 @@ export default function ModelPage() {
         ))}
       </nav>
 
-      {missing ? (
+      {scene === 'renders' ? (
+        <div className="flex-1 overflow-y-auto bg-zinc-950 p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {RENDERS.map(r => (
+              <div key={r.src} className="flex flex-col items-center gap-3">
+                <div className="relative w-full" style={{ aspectRatio: '1 / 1' }}>
+                  <Image src={r.src} alt={r.label} fill className="object-contain" unoptimized />
+                </div>
+                <span className="font-mono text-xs text-zinc-500">{r.label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="font-mono text-xs text-zinc-700 text-center mt-8">
+            Blender Cycles · titanium PBR · transparent background
+          </p>
+        </div>
+      ) : missing ? (
         <div className="flex-1 flex items-center justify-center text-zinc-500 font-mono text-sm p-8 text-center">
           <div>
             <div className="text-amber-400 mb-2">Models not yet generated</div>

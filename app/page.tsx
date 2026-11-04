@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 const WEEKS = [
   { n: 1, label: "CBOR schema & types" },
@@ -14,7 +13,7 @@ const WEEKS = [
 const CURRENT = ["Android transport abstraction", "Robolectric CI", "Team site"];
 
 const CARDS = [
-  { href: "/model",     label: "3D Model",   desc: "Interactive assembly, ring, core, exploded and worn scenes" },
+  { href: "/model",     label: "3D Model",   desc: "Interactive scenes — assembly, ring, core, exploded, worn — plus Blender product renders" },
   { href: "/decisions", label: "Decisions",  desc: "40 architecture decision records with status and principles" },
   { href: "/setup",     label: "Setup",      desc: "Physical NFC testing, local backend, protocol test suite" },
 ];
@@ -40,23 +39,6 @@ export default function Home() {
             <div className="text-sm text-zinc-400">{c.desc}</div>
           </Link>
         ))}
-      </div>
-
-      <div className="mb-14">
-        <h2 className="font-mono text-xs text-zinc-500 uppercase tracking-widest mb-4">Product renders</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[
-            { src: "/renders/hexa-assembly.png", label: "Assembly" },
-            { src: "/renders/hexa-worn.png",     label: "Worn on chain" },
-          ].map(r => (
-            <div key={r.src} className="bg-zinc-900 border border-zinc-800 p-4 flex flex-col items-center gap-3">
-              <div className="relative w-full h-48">
-                <Image src={r.src} alt={r.label} fill className="object-contain" unoptimized />
-              </div>
-              <span className="font-mono text-xs text-zinc-500">{r.label}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
       <div>
