@@ -3,6 +3,7 @@
 - **Status:** Proposed
 - **Date:** 2026-11-04
 - **Principles:** P1, P2, P3
+- **Acceptance dependency:** ADR-0057 (chip access model, UUID persistence, auth verification) must be Accepted before this ADR can be accepted. The public partition specification below is amended by ADR-0057 Decision 1.
 - **Would supersede (if accepted):** ADR-0022 (ring-and-core), ADR-0038 (Chip A ring-only),
   ADR-0040 (physical identification layer — separation doctrine changes),
   ADR-0041/0051/0055 (Ti Gr5 ring — ring eliminated),
@@ -40,7 +41,7 @@ one goes with the reporting chain. Personnel worldwide know the doctrine without
 - **Body:** PC/PETG laminate, 48 mm across-corners, 3.5 mm thick, chamfered edges
 - **Electronics:** single JCOP secure element (NXP SE050 or Infineon SECORA) with
   two logical partitions:
-  - **Public partition** (unauthenticated read): SURNAME, UUID, critical red-flag line
+  - **Public partition** (unauthenticated read): random session identifier only — see ADR-0057 Decision 1 for the amended policy (original: SURNAME, UUID, red-flag line — not adopted; conflicts with ADR-0024)
   - **Protected partition** (authenticated read): full Tier 1 medical profile per ADR-0016
 - **Antenna:** flat hexagonal 2-turn coil wound inside the laminate body; 48 mm aperture
   provides read range ≥ 2 cm (ADR-0052 Gate 1 criterion)

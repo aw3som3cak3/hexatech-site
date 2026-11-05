@@ -79,5 +79,6 @@ export const adrs: Adr[] = [
   { id: '0054', title: 'UUID cylinder and break-off material: 316L default', status: 'Replaced', principles: 'P1, P2', notes: 'Proposed: replaced — cylinder replaced by 316L flange grommet in card hole' },
   { id: '0055', title: 'Material alternatives evaluated — Ti Gr5 outer shell confirmed', status: 'Replaced', principles: 'P1, P2', notes: 'Proposed: replaced — Ti ring eliminated; 316L chosen for both fire-survival elements' },
   // ── Card design (new) ─────────────────────────────────────────────────────
-  { id: '0056', title: 'Alternative physical form factor: NFC hex card + 316L steel tear-away', status: 'Proposed', principles: 'P1, P2, P3', notes: 'Would supersede 0022, 0038, 0040–0043, 0047–0055 if accepted' },
+  { id: '0056', title: 'Alternative physical form factor: NFC hex card + 316L steel tear-away', status: 'Proposed', principles: 'P1, P2, P3', notes: 'Depends on ADR-0057; would supersede 0022, 0038, 0040–0043, 0047–0055 if accepted' },
+  { id: '0057', title: 'V2 chip access model — unauthenticated reader policy, UUID persistence, auth verification', status: 'Proposed', principles: 'P1, P2, P5, P9, P10', notes: 'Required before ADR-0056 acceptance; amends ADR-0024 (deployment exception) and ADR-0056 public partition' },
 ]
