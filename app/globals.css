@@ -6,8 +6,10 @@
   --foreground: #f4f4f5;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+@utility font-bc {
+  font-family: var(--font-bc, 'Barlow Condensed', sans-serif);
+}
+
+@utility font-b {
+  font-family: var(--font-b, Barlow, system-ui, sans-serif);
 }

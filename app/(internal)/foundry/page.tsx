@@ -13,9 +13,9 @@ const WEEKS = [
 const CURRENT = ["Android transport abstraction", "Robolectric CI", "Team site"];
 
 const CARDS = [
-  { href: "/model",     label: "3D Model",   desc: "Interactive scenes — assembly, ring, core, exploded, worn — plus Blender product renders" },
-  { href: "/decisions", label: "Decisions",  desc: "40 architecture decision records with status and principles" },
-  { href: "/setup",     label: "Setup",      desc: "Physical NFC testing, local backend, protocol test suite" },
+  { href: "/foundry/model",     label: "3D Model",   desc: "Interactive scenes — assembly, ring, core, exploded, worn — plus Blender product renders" },
+  { href: "/foundry/decisions", label: "Decisions",  desc: "40 architecture decision records with status and principles" },
+  { href: "/foundry/setup",     label: "Setup",      desc: "Physical NFC testing, local backend, protocol test suite" },
 ];
 
 export default function Home() {
