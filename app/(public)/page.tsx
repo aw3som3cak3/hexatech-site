@@ -7,14 +7,17 @@ type Lang = 'sv' | 'en'
 interface Layer { num: string; title: string; desc: string }
 interface Product { label: string; name: string; tech: string; desc: string; features: string[]; flagship: boolean }
 interface UseCase { domain: string; title: string; items: string[] }
+interface Timeline { period: string; label: string }
 
 interface Content {
   nav: string[]
-  eyebrow: string; headline: string; sub: string; cta: string
+  eyebrow: string; headline: string; sub: string; cta: string; tags: string[]
   whatEyebrow: string; whatH: string; whatSub: string
   layers: Layer[]
   prodEyebrow: string; prodH: string; prodSub: string
   products: Product[]
+  tlEyebrow: string; tlH: string; tlSub: string
+  timeline: Timeline[]
   useEyebrow: string; useH: string; useSub: string
   cases: UseCase[]
   aboutEyebrow: string; aboutH: string; aboutP1: string; aboutP2: string; contactRole: string
@@ -23,32 +26,86 @@ interface Content {
 
 const T: Record<Lang, Content> = {
   sv: {
-    nav: ['Vad är Hexa', 'Produkter', 'Användning', 'Kontakt'],
+    nav: ['Vad är Hexa', 'Produkter', 'Tidslinje', 'Kontakt'],
     eyebrow: 'HEXATEC · SENDEX AB',
-    headline: 'Identitet som överlever fältet.',
-    sub: 'Hexa är ett bärbart identifieringssystem för operativ personal — ett digitalt id-kort för försvaret, totalvärnet och civil beredskap.',
+    headline: 'Fysisk och digital identitetsbricka.',
+    sub: 'Ett bärbart system som bär bärarens identitet, akutmedicinska profil och kryptografiska legitimation i ett enda element — avläsbart offline och verifierbart utan nätverksinfrastruktur.',
     cta: 'Läs mer',
+    tags: ['Offline-first', 'Hårdvaru-2FA · COTS', 'PKI-autentiserat', 'NATO / STANAG', 'Dubbel användning', 'Svensk IP'],
     whatEyebrow: 'VAD ÄR HEXA',
-    whatH: 'Tre lager. En tagg.',
+    whatH: 'Tre lager. En bricka.',
     whatSub: 'Hexa kombinerar fysisk och digital identitet med medicinsk datalagring i ett enda bärbart format.',
     layers: [
-      { num: 'I', title: 'Fysisk identitetbärare', desc: 'En tagg i 316L-stål graverad med identitetsfält som tål eld, vatten och stridsmiljö. Posten som aldrig slår ut — eftersom den saknar elektronik.' },
-      { num: 'II', title: 'Kryptografisk identitetsuppgift', desc: 'En NFC-baserad säkerhetsenhet med AES-256-kryptering (Hexa) eller PKI-stödda identitetsuppgifter (Hexa Trinium). Verifierbar offline utan server eller nätverk.' },
-      { num: 'III', title: 'Medicinsk datalagring', desc: 'Akutdata läsbar av alla med en NFC-enhet. Känsliga uppgifter låsta bakom autentiserad åtkomst. Två nivåer av åtkomstkontroll på en enda tagg.' },
+      {
+        num: 'I',
+        title: 'Fysisk identitetsbärare',
+        desc: 'Systemet består av två element: ett NFC-hexkort som bäraren har på sig, och en avrivbar remsa i 316L stål graverad med namn, organisation och ett unikt registrerings-ID, som stannar hos patienten. Remsan klarar brand vid 1 375 °C och kräver inget batteri, ingen läsare och ingen infrastruktur.',
+      },
+      {
+        num: 'II',
+        title: 'Kryptografisk identitet och 2FA',
+        desc: 'Samma bricka som bärs i fält fungerar som hårdvarusäkerhetsnyckel vid inloggning i operativa appar och system på COTS-enheter. Ingen separat token, ingen proprietär kortläsare. CAC/PIV kräver specialhårdvara som inte fungerar på kommersiella enheter — Hexa fungerar på vilken NFC-telefon som helst.',
+      },
+      {
+        num: 'III',
+        title: 'Skiktad medicinsk datalager',
+        desc: 'Akutmedicinska data lagras direkt på kortet och kan läsas av vilken NFC-telefon som helst — utan nätverksåtkomst. Känsligare uppgifter skyddas bakom autentiserad åtkomst: ett kort, två skyddsnivåer. IPS-strukturerat format möjliggör interoperabilitet med nationella och allierade vårdsystem.',
+      },
     ],
     prodEyebrow: 'PRODUKTLINJEN',
     prodH: 'Två produkter. En plattform.',
     prodSub: 'Samma formfaktor, samma läsare, ingen omskolning. Uppgradera från Hexa till Hexa Trinium när kraven förändras.',
     products: [
-      { label: 'STANDARD', name: 'Hexa', tech: 'DESFire EV3 · AES-256 · NFC', desc: 'COTS-baserat och fältklart. AES-256-kryptering med offline-first-arkitektur. Kompatibelt med standard NFC-läsare utan specialkrav på hårdvara.', features: ['AES-256-kryptering', 'Offline-first — inget nätverk krävs', 'Standard NFC-läsare', 'Pilot Q2 2027'], flagship: true },
-      { label: 'HÖG SÄKERHET', name: 'Hexa Trinium', tech: 'JCOP JavaCard · PKI/ECC · STANAG', desc: 'Full PKI och JavaCard-säkerhetselement med ECC-baserade identitetsuppgifter. STANAG-kompatibelt och uppgraderingsbart från Hexa standard — utan att byta läsare.', features: ['ECC-baserad PKI', 'STANAG-kompatibelt', 'Samma formfaktor som Hexa', 'Produktion 2028'], flagship: false },
+      {
+        label: 'STANDARD',
+        name: 'Hexa',
+        tech: 'DESFire EV3 · AES-256 · NFC',
+        desc: 'COTS-baserat och fältklart. AES-256-kryptering med offline-first-arkitektur. Kompatibelt med standard NFC-läsare utan specialkrav på hårdvara. Avsett för bred driftsättning inom både civil beredskap och fältanvändning.',
+        features: ['AES-256-kryptering', 'Offline-first — inget nätverk krävs', 'Standard NFC-läsare', 'Pilot Q3 2027'],
+        flagship: true,
+      },
+      {
+        label: 'HÖG SÄKERHET',
+        name: 'Hexa Trinium',
+        tech: 'JCOP JavaCard · PKI/ECC · STANAG',
+        desc: 'Full PKI och JavaCard-säkerhetselement med ECC-baserade identitetsuppgifter. STANAG-kompatibelt och uppgraderingsbart från Hexa standard — utan att byta ut läsare eller utbilda om personal.',
+        features: ['ECC-baserad PKI', 'STANAG-kompatibelt', 'Samma formfaktor som Hexa', 'Produktion 2028'],
+        flagship: false,
+      },
+    ],
+    tlEyebrow: 'LEVERANSTIDSLINJE',
+    tlH: 'Definierad plattform. Klara milstolpar.',
+    tlSub: 'Hårdvaruplattformen är designfryst. Byggt uteslutande på standardkomponenter — tillverkning är inte den kritiska vägen.',
+    timeline: [
+      { period: 'Q1 2027', label: 'Klinisk arbetsflödesvalidering med sjukvårdspersonal' },
+      { period: 'Q2 2027', label: 'Hexa teknisk demonstration, enrollmentflöde och kortproduktion' },
+      { period: 'Q3 2027', label: 'Hexa pilotklar, 50–100 enheter för fältutvärdering' },
+      { period: '2028',    label: 'Produktionsserie båda produkter, inhemsk tillverkning' },
     ],
     useEyebrow: 'ANVÄNDNING',
     useH: 'Dubbel användning.',
-    useSub: 'Hexa är utvecklat för Försvarsmakten och totalvärnet. Samma plattform löser identifiering inom civil beredskap.',
+    useSub: 'Hexa är konstruerat för dubbel användning från grunden. Samma system identifierar operativ personal, blåljuspersonal, räddningstjänst och civilförsvarspliktiga — ett upphandlingsbeslut täcker båda sidor av totalförsvarets personalspektrum.',
     cases: [
-      { domain: 'MILITÄR', title: 'Försvarsmakten · NATO', items: ['Fältidentifiering av personal', 'Medicinsk triage och räddningsinsats', 'NATO-interoperabilitet och STANAG', 'Offline-autentisering utan nätverk'] },
-      { domain: 'CIVIL', title: 'MSB · Totalvärn', items: ['Blåljuspersonal och räddningsväsen', 'Krishantering och CBRN-scenarier', 'Suverän datainfrastruktur', 'Integration med befintliga system'] },
+      {
+        domain: 'MILITÄR',
+        title: 'Försvarsmakten · NATO',
+        items: [
+          'Fältidentifiering och medicinsk triage',
+          'NATO-interoperabilitet via STANAG och IPS',
+          'Offline-autentisering utan nätverk',
+          'TCCC-journal följer soldaten i CASEVAC-kedjan',
+        ],
+      },
+      {
+        domain: 'CIVIL',
+        title: 'MSB · Totalförsvar',
+        items: [
+          'Blåljuspersonal, räddningstjänst och civilförsvarspliktiga',
+          'Krishantering och CBRN-scenarier',
+          'COTS-läsarkompatibilitet — vilken NFC-telefon som helst',
+          'Suverän datainfrastruktur under svensk kontroll',
+        ],
+      },
     ],
     aboutEyebrow: 'OM OSS',
     aboutH: 'Sendex AB',
@@ -58,32 +115,86 @@ const T: Record<Lang, Content> = {
     footerCopy: '© 2026 Sendex AB · Sverige · Svensk IP',
   },
   en: {
-    nav: ['What is Hexa', 'Products', 'Use cases', 'Contact'],
+    nav: ['What is Hexa', 'Products', 'Timeline', 'Contact'],
     eyebrow: 'HEXATEC · SENDEX AB',
-    headline: 'Identity that survives the field.',
-    sub: 'Hexa is a wearable identification system for operational personnel — a digital identity tag for defence, total defence, and civil preparedness.',
+    headline: 'Physical and digital identity tag.',
+    sub: 'A wearable system carrying the bearer\'s identity, emergency medical profile and cryptographic credential in a single element — readable offline and verifiable without network infrastructure.',
     cta: 'Learn more',
+    tags: ['Offline-first', 'Hardware 2FA · COTS', 'PKI-authenticated', 'NATO / STANAG', 'Dual use', 'Swedish IP'],
     whatEyebrow: 'WHAT IS HEXA',
     whatH: 'Three layers. One tag.',
     whatSub: 'Hexa combines physical and digital identity with medical data storage in a single wearable format.',
     layers: [
-      { num: 'I', title: 'Physical identity carrier', desc: 'A 316L steel tag engraved with identity fields that survive fire, water, and battlefield conditions. The record that never fails because it carries no electronics.' },
-      { num: 'II', title: 'Cryptographic identity credential', desc: 'An NFC-based secure element with AES-256 encryption (Hexa) or PKI-backed credentials (Hexa Trinium). Verifiable offline, without a server or network.' },
-      { num: 'III', title: 'Tiered medical data store', desc: 'Emergency data readable by any NFC device. Sensitive records locked behind authenticated access. Two tiers of access control on a single tag.' },
+      {
+        num: 'I',
+        title: 'Physical identity carrier',
+        desc: 'Two-element design: an NFC hex card worn by the bearer, and a 316L steel tear-away strip engraved with name, organisation and a unique registration ID that stays with the patient. Survives fire at 1,375 °C. No battery, no reader, no infrastructure.',
+      },
+      {
+        num: 'II',
+        title: 'Cryptographic identity and 2FA',
+        desc: 'The same tag worn in the field acts as a hardware security key when logging into operational apps and systems on COTS devices. No separate token, no proprietary card reader. CAC/PIV requires dedicated hardware that does not work on commercial devices — Hexa works on any NFC-enabled phone.',
+      },
+      {
+        num: 'III',
+        title: 'Tiered medical data store',
+        desc: 'Emergency medical data stored directly on the card, readable by any NFC phone — without network access. Sensitive records protected behind authenticated access: one card, two security tiers. IPS-structured format enables interoperability with national and allied healthcare systems.',
+      },
     ],
     prodEyebrow: 'PRODUCT LINE',
     prodH: 'Two products. One platform.',
     prodSub: 'Same form factor, same readers, no retraining required. Upgrade from Hexa to Hexa Trinium as requirements evolve.',
     products: [
-      { label: 'STANDARD', name: 'Hexa', tech: 'DESFire EV3 · AES-256 · NFC', desc: 'COTS-based and field-ready. AES-256 encryption with offline-first architecture. Compatible with standard NFC readers, no special hardware required.', features: ['AES-256 encryption', 'Offline-first — no network required', 'Standard NFC readers', 'Pilot Q2 2027'], flagship: true },
-      { label: 'HIGH SECURITY', name: 'Hexa Trinium', tech: 'JCOP JavaCard · PKI/ECC · STANAG', desc: 'Full PKI and JavaCard secure element with ECC-based identity credentials. STANAG-compatible and upgradeable from Hexa standard — without changing readers.', features: ['ECC-based PKI', 'STANAG-compatible', 'Same form factor as Hexa', 'Production 2028'], flagship: false },
+      {
+        label: 'STANDARD',
+        name: 'Hexa',
+        tech: 'DESFire EV3 · AES-256 · NFC',
+        desc: 'COTS-based and field-ready. AES-256 encryption with offline-first architecture. Compatible with standard NFC readers, no special hardware required. Designed for broad deployment across civil preparedness and field operations.',
+        features: ['AES-256 encryption', 'Offline-first — no network required', 'Standard NFC readers', 'Pilot Q3 2027'],
+        flagship: true,
+      },
+      {
+        label: 'HIGH SECURITY',
+        name: 'Hexa Trinium',
+        tech: 'JCOP JavaCard · PKI/ECC · STANAG',
+        desc: 'Full PKI and JavaCard secure element with ECC-based identity credentials. STANAG-compatible and upgradeable from Hexa standard — without changing readers or retraining staff.',
+        features: ['ECC-based PKI', 'STANAG-compatible', 'Same form factor as Hexa', 'Production 2028'],
+        flagship: false,
+      },
+    ],
+    tlEyebrow: 'DELIVERY TIMELINE',
+    tlH: 'Defined platform. Clear milestones.',
+    tlSub: 'Hardware platform is design-frozen. Built exclusively on standard components — manufacturing is not the critical path.',
+    timeline: [
+      { period: 'Q1 2027', label: 'Clinical workflow validation with healthcare professionals' },
+      { period: 'Q2 2027', label: 'Hexa technical demonstration, enrolment flow and card production' },
+      { period: 'Q3 2027', label: 'Hexa pilot-ready, 50–100 units for field evaluation' },
+      { period: '2028',    label: 'Production series both products, domestic manufacturing' },
     ],
     useEyebrow: 'USE CASES',
     useH: 'Dual use.',
-    useSub: 'Hexa is built for the Swedish Armed Forces and total defence. The same platform solves identification across civil preparedness.',
+    useSub: 'Hexa is built for dual use from the ground up. The same system identifies operational personnel, emergency responders, rescue services and civil defence personnel — one procurement decision covers both sides of the total defence spectrum.',
     cases: [
-      { domain: 'MILITARY', title: 'Armed Forces · NATO', items: ['Field identification of personnel', 'Medical triage and rescue operations', 'NATO interoperability and STANAG', 'Offline authentication without network'] },
-      { domain: 'CIVIL', title: 'MSB · Total defence', items: ['Emergency services and rescue', 'Crisis management and CBRN scenarios', 'Sovereign data infrastructure', 'Integration with existing systems'] },
+      {
+        domain: 'MILITARY',
+        title: 'Armed Forces · NATO',
+        items: [
+          'Field identification and medical triage',
+          'NATO interoperability via STANAG and IPS',
+          'Offline authentication without network',
+          'TCCC record follows the casualty through CASEVAC',
+        ],
+      },
+      {
+        domain: 'CIVIL',
+        title: 'MSB · Total defence',
+        items: [
+          'Emergency services, rescue and civil defence',
+          'Crisis management and CBRN scenarios',
+          'COTS reader compatibility — any NFC phone',
+          'Sovereign data infrastructure under Swedish control',
+        ],
+      },
     ],
     aboutEyebrow: 'ABOUT',
     aboutH: 'Sendex AB',
@@ -97,7 +208,7 @@ const T: Record<Lang, Content> = {
 const BC = "var(--font-bc, 'Barlow Condensed', sans-serif)"
 const B = "var(--font-b, Barlow, system-ui, sans-serif)"
 
-const NAV_ANCHORS = ['#what', '#products', '#usecases', '#about']
+const NAV_ANCHORS = ['#what', '#products', '#timeline', '#about']
 
 export default function HomePage() {
   const [lang, setLang] = useState<Lang>('sv')
@@ -155,9 +266,16 @@ export default function HomePage() {
           <h1 style={{ fontFamily: BC, fontSize: 'clamp(48px, 7.5vw, 92px)', fontWeight: 800, lineHeight: 1.0, color: '#F1F5F9', margin: '0 0 20px', textWrap: 'balance' as never }}>
             {t.headline}
           </h1>
-          <p style={{ fontSize: 'clamp(16px, 1.8vw, 19px)', color: '#94A3B8', lineHeight: 1.7, margin: '0 0 44px', maxWidth: 580 }}>
+          <p style={{ fontSize: 'clamp(16px, 1.8vw, 19px)', color: '#94A3B8', lineHeight: 1.7, margin: '0 0 28px', maxWidth: 580 }}>
             {t.sub}
           </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 44 }}>
+            {t.tags.map(tag => (
+              <span key={tag} style={{ fontFamily: BC, fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#3B82F6', border: '1px solid #1E3A5F', padding: '5px 13px' }}>
+                {tag}
+              </span>
+            ))}
+          </div>
           <a href="#what" style={{ fontFamily: BC, fontSize: 14, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: '#3B82F6', color: '#fff', border: '1px solid #3B82F6', textDecoration: 'none', display: 'inline-block', padding: '13px 30px', borderRadius: 2 }}>
             {t.cta}
           </a>
@@ -205,11 +323,26 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── TIMELINE ── */}
+      <section id="timeline" style={{ background: '#F3F5F9' }} className="px-6 md:px-14 py-20">
+        <p style={{ fontFamily: BC, fontSize: 11, fontWeight: 700, letterSpacing: '0.45em', color: '#1D4ED8', textTransform: 'uppercase', margin: '0 0 14px' }}>{t.tlEyebrow}</p>
+        <h2 style={{ fontFamily: BC, fontSize: 'clamp(32px, 4vw, 52px)', fontWeight: 800, lineHeight: 1.1, color: '#0C1117', margin: '0 0 14px' }}>{t.tlH}</h2>
+        <p style={{ fontSize: 17, color: '#546077', lineHeight: 1.7, maxWidth: 600, margin: '0 0 52px' }}>{t.tlSub}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4" style={{ gap: 1, background: '#DDE3EC', border: '1px solid #DDE3EC' }}>
+          {t.timeline.map(item => (
+            <div key={item.period} style={{ background: '#fff', padding: '28px 28px', borderTop: '3px solid #1D4ED8', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <span style={{ fontFamily: BC, fontSize: 22, fontWeight: 800, color: '#1D4ED8', lineHeight: 1 }}>{item.period}</span>
+              <p style={{ fontSize: 14, color: '#546077', lineHeight: 1.6, margin: 0 }}>{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── USE CASES ── */}
       <section id="usecases" style={{ background: '#fff' }} className="px-6 md:px-14 py-20">
         <p style={{ fontFamily: BC, fontSize: 11, fontWeight: 700, letterSpacing: '0.45em', color: '#1D4ED8', textTransform: 'uppercase', margin: '0 0 14px' }}>{t.useEyebrow}</p>
         <h2 style={{ fontFamily: BC, fontSize: 'clamp(32px, 4vw, 52px)', fontWeight: 800, lineHeight: 1.1, color: '#0C1117', margin: '0 0 14px' }}>{t.useH}</h2>
-        <p style={{ fontSize: 17, color: '#546077', lineHeight: 1.7, maxWidth: 600, margin: '0 0 52px' }}>{t.useSub}</p>
+        <p style={{ fontSize: 17, color: '#546077', lineHeight: 1.7, maxWidth: 640, margin: '0 0 52px' }}>{t.useSub}</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {t.cases.map(c => (
             <div key={c.domain} style={{ background: '#F3F5F9', borderLeft: '3px solid #1D4ED8', padding: 40, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -229,18 +362,19 @@ export default function HomePage() {
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" style={{ background: '#F3F5F9' }} className="px-6 md:px-14 py-20 grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-20">
+      <section id="about" style={{ background: '#0C1117' }} className="px-6 md:px-14 py-20 grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-20">
         <div>
-          <p style={{ fontFamily: BC, fontSize: 11, fontWeight: 700, letterSpacing: '0.45em', color: '#1D4ED8', textTransform: 'uppercase', margin: '0 0 14px' }}>{t.aboutEyebrow}</p>
-          <h2 style={{ fontFamily: BC, fontSize: 'clamp(32px, 4vw, 52px)', fontWeight: 800, lineHeight: 1.1, color: '#0C1117', margin: '0 0 14px' }}>{t.aboutH}</h2>
-          <p style={{ fontSize: 16, color: '#546077', lineHeight: 1.75, margin: '0 0 18px', maxWidth: 420 }}>{t.aboutP1}</p>
-          <p style={{ fontSize: 16, color: '#546077', lineHeight: 1.75, margin: 0 }}>{t.aboutP2}</p>
+          <p style={{ fontFamily: BC, fontSize: 11, fontWeight: 700, letterSpacing: '0.45em', color: '#3B82F6', textTransform: 'uppercase', margin: '0 0 14px' }}>{t.aboutEyebrow}</p>
+          <h2 style={{ fontFamily: BC, fontSize: 'clamp(32px, 4vw, 52px)', fontWeight: 800, lineHeight: 1.1, color: '#F1F5F9', margin: '0 0 14px' }}>{t.aboutH}</h2>
+          <p style={{ fontSize: 16, color: '#94A3B8', lineHeight: 1.75, margin: '0 0 18px', maxWidth: 420 }}>{t.aboutP1}</p>
+          <p style={{ fontSize: 16, color: '#94A3B8', lineHeight: 1.75, margin: 0 }}>{t.aboutP2}</p>
         </div>
-        <div className="self-start" style={{ background: '#fff', border: '1px solid #DDE3EC', borderTop: '3px solid #1D4ED8', padding: 36, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <span style={{ fontFamily: BC, fontSize: 11, fontWeight: 700, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#1D4ED8' }}>{t.contactRole}</span>
-          <h3 style={{ fontFamily: BC, fontSize: 24, fontWeight: 700, color: '#0C1117', margin: 0 }}>Erik Obitz</h3>
-          <div style={{ fontFamily: BC, fontSize: 20, fontWeight: 600, color: '#1D4ED8', marginTop: 8, wordBreak: 'break-all' }}>sales@sendex.se</div>
-          <p style={{ fontSize: 14, color: '#546077', margin: 0 }}>hexatec.se</p>
+        <div className="self-start" style={{ background: '#0F1E35', border: '1px solid #1E3A5F', borderTop: '3px solid #3B82F6', padding: 36, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <span style={{ fontFamily: BC, fontSize: 11, fontWeight: 700, letterSpacing: '0.4em', textTransform: 'uppercase', color: '#3B82F6' }}>{t.contactRole}</span>
+          <h3 style={{ fontFamily: BC, fontSize: 24, fontWeight: 700, color: '#F1F5F9', margin: 0 }}>Erik Obitz</h3>
+          <div style={{ fontFamily: BC, fontSize: 18, fontWeight: 600, color: '#3B82F6', marginTop: 8, wordBreak: 'break-all' }}>erik.obitz@hexatec.se</div>
+          <p style={{ fontSize: 14, color: '#94A3B8', margin: 0 }}>073 735 10 36</p>
+          <p style={{ fontSize: 14, color: '#94A3B8', margin: 0 }}>hexatec.se</p>
         </div>
       </section>
 
