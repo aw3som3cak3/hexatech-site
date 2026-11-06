@@ -67,5 +67,5 @@ export const adrs: Adr[] = [
   { id: '0055', title: 'Field-grade ring material alternatives evaluated — Ti Gr5 confirmed', status: 'Accepted', principles: 'P1, P2, P3', notes: 'Amends ADR-0041' },
   { id: '0056', title: 'Alternative physical form factor — NFC hex card + 316L steel tear-away', status: 'Proposed', principles: 'P1, P2, P3', notes: 'Conflicts with ADR-0022; depends on ADR-0057', section: 'Gen 2 — Card form factor' },
   { id: '0057', title: 'V2 chip access model — unauthenticated reader policy, UUID persistence, auth verification', status: 'Proposed', principles: 'P1, P2, P5, P9, P10', notes: 'Amends ADR-0024, ADR-0056' },
-  { id: '0058', title: 'Chip selection — MIFARE DESFire EV3 for Hexa and JCOP JavaCard for Hexa Trinium', status: 'Proposed', principles: 'P1, P2, P6, P10' },
+  { id: '0058', title: 'Chip evaluation and selection — MIFARE DUOX for Hexa, JCOP for Hexa Trinium', status: 'Proposed', principles: 'P1, P2, P6, P10', notes: 'Tension with ADR-0009 (one chip); DeSFire EV3 rejected for P1; see Decision 5' },
 ]
