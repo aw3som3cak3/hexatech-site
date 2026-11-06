@@ -27,7 +27,7 @@ export default function DecisionsPage() {
         <CopyButton text={fullContext} label="Copy all context for agent" />
       </div>
       <p className="text-zinc-500 text-sm mb-6">
-        40 architecture decision records · click a title to read and copy individually
+        58 architecture decision records · click a title to read and copy individually
       </p>
       <DecisionsClient />
     </div>

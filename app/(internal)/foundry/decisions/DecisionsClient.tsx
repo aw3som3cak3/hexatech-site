@@ -57,6 +57,12 @@ export default function DecisionsClient() {
           </thead>
           <tbody>
             {visible.map((adr, i) => (
+              <>
+              {adr.section && (
+                <tr key={`section-${adr.id}`} className="border-b border-zinc-800 bg-zinc-950">
+                  <td colSpan={4} className="px-4 py-2 font-mono text-xs text-amber-400/70 tracking-widest uppercase">{adr.section}</td>
+                </tr>
+              )}
               <tr key={adr.id}
                 className={`border-b border-zinc-800/60 ${i % 2 === 0 ? '' : 'bg-zinc-900/30'}`}>
                 <td className="px-4 py-2.5 font-mono text-xs text-zinc-500">{adr.id}</td>
@@ -81,6 +87,7 @@ export default function DecisionsClient() {
                   </span>
                 </td>
               </tr>
+              </>
             ))}
           </tbody>
         </table>

@@ -18,7 +18,7 @@ export default function LoginPage() {
     })
     setLoading(false)
     if (res.ok) {
-      window.location.href = '/'
+      window.location.href = '/foundry'
     } else {
       setError(true)
     }

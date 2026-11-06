@@ -6,6 +6,7 @@ export interface Adr {
   status: AdrStatus
   principles: string
   notes?: string
+  section?: string   // section header rendered before this row
 }
 
 export const adrs: Adr[] = [
@@ -49,4 +50,22 @@ export const adrs: Adr[] = [
   { id: '0038', title: 'Chip A ring-only profile — red-flag line and tag locator only', status: 'Accepted', principles: 'P1, P2, P3, P5' },
   { id: '0039', title: 'NOK delegated write access deferred to account-level delegation', status: 'Accepted', principles: 'P5, P6, P9' },
   { id: '0040', title: 'Physical identification layer — engraving, chain mount, separation doctrine', status: 'Accepted', principles: 'P1, P2, P3, P5' },
+  { id: '0041', title: 'Frame material: titanium Gr5 and anodize finish', status: 'Accepted', principles: 'P1, P2, P3', notes: 'Amended by ADR-0051, 0055' },
+  { id: '0042', title: 'Open ring front face and parting groove', status: 'Accepted', principles: 'P1, P2' },
+  { id: '0043', title: 'Back face operation instruction engraving', status: 'Superseded', principles: 'P2', notes: 'Superseded by ADR-0050' },
+  { id: '0044', title: 'Tag as session token and cross-app credential provider', status: 'Accepted', principles: 'P5, P9, P10' },
+  { id: '0045', title: 'Correct chip A/B assignment in ADR-0040', status: 'Accepted', principles: 'P2', notes: 'Amends ADR-0040' },
+  { id: '0046', title: 'Proposed: red-flag free text conflicts with P4', status: 'Proposed', principles: 'P4' },
+  { id: '0047', title: 'Physical finish and interaction affordance refinements', status: 'Accepted', principles: 'P2, P3' },
+  { id: '0048', title: 'Ring construction: metal shell and polymer electronics carrier', status: 'Accepted', principles: 'P1, P2' },
+  { id: '0049', title: 'Fire-survivable UUID cylinder and break-off element', status: 'Accepted', principles: 'P1, P2', notes: 'Amended by ADR-0054' },
+  { id: '0050', title: 'Separation instruction corrected to PUSH · TURN ↺ · PULL', status: 'Accepted', principles: 'P2, P5', notes: 'Supersedes ADR-0043' },
+  { id: '0051', title: 'Correct ADR-0041 — anodize sequence, colour, MRI safety framing', status: 'Accepted', principles: 'P1, P2, P3', notes: 'Amends ADR-0041' },
+  { id: '0052', title: 'Physical design validation plan — three prototype gates', status: 'Accepted', principles: 'P1, P2, P3', notes: 'Amends ADR-0022, 0041, 0042' },
+  { id: '0053', title: 'Restore SURNAME engraving on ring face 0', status: 'Accepted', principles: 'P2, P3', notes: 'Amends ADR-0047 Decision 1' },
+  { id: '0054', title: 'UUID cylinder and break-off plate: 316L stainless default', status: 'Accepted', principles: 'P1, P2, P3', notes: 'Amends ADR-0049' },
+  { id: '0055', title: 'Field-grade ring material alternatives evaluated — Ti Gr5 confirmed', status: 'Accepted', principles: 'P1, P2, P3', notes: 'Amends ADR-0041' },
+  { id: '0056', title: 'Alternative physical form factor — NFC hex card + 316L steel tear-away', status: 'Proposed', principles: 'P1, P2, P3', notes: 'Conflicts with ADR-0022; depends on ADR-0057', section: 'Gen 2 — Card form factor' },
+  { id: '0057', title: 'V2 chip access model — unauthenticated reader policy, UUID persistence, auth verification', status: 'Proposed', principles: 'P1, P2, P5, P9, P10', notes: 'Amends ADR-0024, ADR-0056' },
+  { id: '0058', title: 'Chip selection — MIFARE DESFire EV3 for Hexa and JCOP JavaCard for Hexa Trinium', status: 'Proposed', principles: 'P1, P2, P6, P10' },
 ]
