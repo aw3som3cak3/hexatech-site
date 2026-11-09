@@ -91,9 +91,13 @@ Tag Locator at a bare-eye-readable character height. The grommet carries the **f
 6 Crockford characters of the Tag Locator**, die-struck to ≥ 0.3 mm physical relief depth.
 Readable with a 10× loupe under raking light after fire exposure. Treat as forensic fallback
 for laboratory identification; bare-eye field identification relies on the tear-away face.
-A 6-char prefix spans ~30 bits (Crockford base32); at deployments of up to ~10 K enrolled
-individuals, this prefix is sufficient for direct registry lookup; at larger deployments,
-disambiguation by SURNAME, UNIT, or location context narrows the candidate set.
+A 6-char prefix spans ~30 bits (Crockford base32). At 10 K enrolled individuals the birthday
+collision probability is ~4.5% — the prefix is not guaranteed unique by space alone. The enrollment
+system must enforce prefix uniqueness within the lookup scope, or explicitly support ambiguous
+forensic lookup with disambiguation by SURNAME, UNIT, or deployment context. The grommet
+abbreviated locator carries no check character; a misread from a fire-damaged part is not
+self-detecting. Registry disambiguation by name and unit is the correction path — make this
+explicit in the enrollment system specification.
 The full 11-char Tag Locator is engraved on the tear-away face (bare-eye field read).
 Minimum character height on the grommet flange: ≥ 1.5 mm at mid-ring radius (confirm
 in CAD before die specification is issued).
@@ -107,8 +111,13 @@ is 3.5 mm diameter.
 
 **Chain ball/link diameter:** chain ball or link diameter on the grommet's chain segment must
 exceed the 3.5 mm bore — minimum ball diameter 4.0 mm — so the grommet cannot slide off
-the chain when the plastic card body burns away. Chain assembly method (end-threading or
-split-bore grommet) must be defined in the manufacturing drawing before tooling is ordered.
+the chain when the plastic card body burns away.
+
+**Chain assembly method:** a ball ≥ 4.0 mm cannot be threaded through a 3.5 mm bore — end-threading
+is not an option. The chain design must use one of: (a) a split-bore or crimp-closed grommet that
+opens to accept the chain and is then closed, or (b) a closed-link chain topology where the grommet
+is captured during assembly rather than threaded. Consequence: the chain cannot be field-swapped
+without specialised tools. This must be defined in the manufacturing drawing before tooling is ordered.
 
 The assembly has three Tag Locator carriers: card grommet flange (6-char abbreviated locator,
 die-struck), tear-away grommet flange (6-char abbreviated locator, die-struck), tear-away
@@ -159,11 +168,25 @@ to the main neck chain, easily separated by the first responder who encounters t
 **RF stacking mitigation (EE review 2026-11-09, OQ-33 decision):** A solid 316L disc
 (54 mm × 2.5 mm) is ~21 skin depths thick at 13.56 MHz (δ ≈ 0.12 mm) and suppresses NFC
 field coupling by 70–95% in the stacked configuration — reads will fail without mitigation.
-Orientation doctrine is not viable: both elements hang from the same chain point and rotate
-freely; no mechanism maintains tear-away orientation relative to the card face. "Unclip
-tear-away first" is excluded (ADR-0063 Decision 1b). **Required mitigation: ferrite sheet**
-bonded to the card back face (specified under Element 1 Antenna above). Gate 1 stacked-with-ferrite
-configuration is a hard pass criterion (ADR-0065 Gate 1 measurement 8).
+"Unclip tear-away first" is excluded (ADR-0063 Decision 1b).
+
+**Required mitigation: ferrite sheet** bonded to the card back face (specified under Element 1
+Antenna above). Note: NXP antenna guidance states ferrite changes the field and antenna tuning
+but does not necessarily improve operating distance — Gate 1 measurement 8 (config D) is the
+empirical confirmation.
+
+The ferrite sheet makes the card functionally asymmetric: the **front face is the readable face**
+(NFC icon marked on front). For reliable reads, the reader should be presented to the front face.
+
+**Recommended handling step before tapping:** "move the tear-away aside before presenting the reader
+to the card front face." This is deliberate handling, not removal; it does not violate ADR-0063
+Decision 1b. First responders and trained users should be instructed to do this. The ferrite sheet
+remains required as the passive mitigation for cases where the user does not perform this step or
+the reader geometry is unknown (e.g. automated gate reader).
+
+**Gate 1 failure configs (documented limitations):** ADR-0065 Gate 1 also records (config E)
+card reversed — reader on ferrite/back face — and (config F) tear-away in front of card without
+moving aside. Both are expected fails; they document the design's known orientation sensitivity.
 
 ### Why no NFC on the tear-away
 
@@ -198,14 +221,18 @@ the ring.
 ## Sealed manufacturing unit
 
 The JCOP card, grommet, and silicone surround form a **sealed card assembly**. The 316L
-tear-away is enrolled in the same transaction but is a physically separate element.
-At the enrollment event the **Enrollment ID** is written to the chip and the
-**Tag Locator** is engraved on all physical carriers in one atomic transaction:
+tear-away is enrolled in the same controlled transaction but is a physically separate element.
 
-1. **JCOP chip** — Enrollment ID written (never externally visible; physical carriers use Tag Locator)
-2. **Grommet flange face** — Tag Locator laser-engraved (316L, fire-survivable)
-3. **Tear-away face** — Tag Locator laser-engraved (316L, fire-survivable)
-4. **Card face** — Tag Locator printed (PC laminate, visual read; not fire-survivable)
+**Enrollment sequence (not a single atomic write — a controlled transaction with readback verification):**
+
+1. Allocate Enrollment ID in the enrollment system registry.
+2. Engrave physical carriers (grommet flanges die-struck, tear-away face fiber-laser ≥ 0.3 mm depth, card face printed) — this is the step where Tag Locator is committed to 316L; grommets must already be matched to their designated assemblies from the pre-assembly engraving step.
+3. Assemble: press-fit grommet into card; bond silicone surround.
+4. Personalise the JCOP chip: write Enrollment ID, configure partitions, provision keys.
+5. Readback verification: scan card; verify Tag Locator on chip matches grommet engraving and matches enrollment registry entry.
+6. Release set, or reject the entire set if any carrier mismatches.
+
+PII (name, unit, allergies) is added to the tear-away and card face at personalisation, after Tag Locator enrollment. The sequence preserves atomicity at the transaction level — a mismatch at step 5 voids the full set before it ships.
 
 The silicone surround is bonded at manufacture with mechanical retention (a 0.6–0.8 mm
 peripheral channel in the card laminate edge). The card is not removable without destroying the
@@ -365,11 +392,11 @@ military ID.
    drawing is finalized — this is the one remaining open action before this OQ closes**). The
    derating calculation is documented here:
 
-   **H_min reference:** ISO 14443-1 Section 7 requires all PICCs to operate at H_min ≤ 1.5 A/m
-   (the standard-defined minimum reader field). The P71D600 is ISO 14443-4 certified (ADR-0059);
-   therefore H_min ≤ 1.5 A/m is a standard obligation, not a datasheet proxy. Using 1.5 A/m in
-   the calculation is a conservative worst case — most modern smart-card chips (including NXP
-   SmartMX3 family) operate down to 0.5–1.0 A/m, which would further widen the margin.
+   **H_min reference:** field-strength requirements for PICCs are in ISO/IEC 14443-2 (RF power and
+   signal interface), not Part 1. The applicable H_min depends on PICC class; a compliant PICC must
+   operate in a field of 1.5 A/m (ISO 14443-2 minimum). The P71D600 is ISO 14443-4 certified, so
+   H_min ≤ 1.5 A/m is a standard obligation. Using 1.5 A/m is a conservative worst case — real
+   chip sensitivity is typically 0.5–1.0 A/m, which widens the margin.
 
    At resonance with matched load, chip terminal voltage ≈ Q × V_oc / 2.
    - Free air (Q = 20): V_chip ≈ 20 × 0.5 / 2 = **5.0 V** — well above chip minimum.
@@ -378,9 +405,11 @@ military ID.
    - Ferrite sheet increases effective L by ~5–10%, raising V_oc to ~0.52–0.55 V: margin widens slightly.
 
    Conclusion: **Q ≥ 20 free air is the critical margin parameter.** Q ≥ 20 is a hard Gate 1 pass
-   criterion (ADR-0065 measurement 3). Power budget is closed: H_min is bounded by ISO 14443-1;
-   derating calculation shows positive margin at all configurations provided Q ≥ 20 is confirmed
-   at Gate 1. No NDA-covered datasheet figure required. ✓
+   criterion (ADR-0065 measurement 3). The V_chip calculation above is a sanity estimate, not a
+   closed budget — actual performance depends on coupling, loading, resonance, and chip power
+   consumption in the assembled device. **Power budget status: provisionally estimated, pending
+   Gate 1 confirmation.** The derating calculation establishes the design is not implausible; Gate 1
+   measurement 3 (loaded Q) and measurement 8 (full config D read range) provide the empirical closure.
 
    **ID review (2026-11-09):** confirmed. 8 engraving rows at 3 mm resolves OQ-7 (character
    height). Grommet structural risk at 1.5 mm vertex margin is gone at 4.5 mm. Surround
