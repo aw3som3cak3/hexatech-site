@@ -68,7 +68,7 @@ export const adrs: Adr[] = [
   { id: '0044', title: 'Tag as short-lived session token and cross-app credential provider', status: 'Accepted', principles: 'P1, P6, P10' },
   // ── Physical layer — ring-and-core (original, cont.) ──────────────────────
   { id: '0045', title: 'Correct chip A/B assignment in ADR-0040', status: 'Replaced', principles: 'P1', notes: 'Proposed: replaced — corrects a replaced ADR' },
-  { id: '0046', title: 'Proposed: red-flag free text conflicts with P4', status: 'Proposed', principles: 'P4, P3' },
+  { id: '0046', title: 'RED_FLAG as bounded free-text advisory — P4 amended', status: 'Accepted', principles: 'P3, P4, P8, P10', notes: 'Accepted; amends P4 (bounded free text exception, max 80 chars)' },
   { id: '0047', title: 'Physical finish and interaction affordance refinements', status: 'Replaced', principles: 'P1, P2', notes: 'Proposed: replaced — ring-specific finish decisions' },
   { id: '0048', title: 'Ring construction: metal shell + polymer electronics carrier', status: 'Replaced', principles: 'P1, P2', notes: 'Proposed: replaced — no ring in card design' },
   { id: '0049', title: 'Fire-survivable UUID cylinder and break-off element', status: 'Replaced', principles: 'P1, P2', notes: 'Proposed: replaced — 316L grommet + tear-away serve fire-survival (ADR-0056)' },
@@ -81,4 +81,11 @@ export const adrs: Adr[] = [
   // ── Card design (new) ─────────────────────────────────────────────────────
   { id: '0056', title: 'Alternative physical form factor: NFC hex card + 316L steel tear-away', status: 'Proposed', principles: 'P1, P2, P3', notes: 'Depends on ADR-0057; would supersede 0022, 0038, 0040–0043, 0047–0055 if accepted' },
   { id: '0057', title: 'V2 chip access model — unauthenticated reader policy, UUID persistence, auth verification', status: 'Proposed', principles: 'P1, P2, P5, P9, P10', notes: 'Required before ADR-0056 acceptance; amends ADR-0024 (deployment exception) and ADR-0056 public partition' },
+  { id: '0058', title: 'Chip evaluation and selection — MIFARE DUOX for Hexa, JCOP for Hexa Trinium', status: 'Superseded', principles: 'P1, P2, P6, P10', notes: 'Superseded by ADR-0059' },
+  { id: '0059', title: 'Chip consolidation — JCOP 4 for all Hexa variants; DUOX deferred', status: 'Proposed', principles: 'P1, P2, P6, P10', notes: 'Supersedes ADR-0058; restores ADR-0009; Hexa Trinium retired for now' },
+  { id: '0060', title: 'Identifier model — enrollment ID, pairwise RP ID, and session token', status: 'Proposed', principles: 'P2, P5, P7, P9', notes: 'Amends ADR-0040 short-ID derivation; resolves OQ-23' },
+  { id: '0061', title: 'Consumer Tier 1 access and sovereign mode split', status: 'Proposed', principles: 'P1, P5, P9', notes: 'Amends ADR-0057 Decision 1; corrects P9 contradiction' },
+  { id: '0062', title: 'Tag and tear-away data model — card form factor', status: 'Proposed', principles: 'P1, P2, P3, P5', notes: 'Amends ADR-0056; tear-away is passive steel, no chip' },
+  { id: '0063', title: 'Death confirmation — card form factor', status: 'Proposed', principles: 'P1, P8, P9', notes: 'Two-key principle via JCOP applet state machine; amends ADR-0056, 0023' },
+  { id: '0064', title: 'Editorial corrections — ADR-0033, 0040, 0044, 0049', status: 'Proposed', principles: 'P1, P2, P10', notes: 'Batch amendments: PQC cert size, blood type rationale, clock attestation, polymer element' },
 ]

@@ -54,12 +54,12 @@ export default function DecisionsV2Page() {
         <CopyButton text={fullContext} label="Copy all context for agent" />
       </div>
       <p className="text-zinc-500 text-sm mb-4">
-        56 ADRs · <span className="text-amber-400">Accepted</span> = unchanged · <span className="text-blue-400">Proposed</span> = new · <span className="text-orange-400">Replaced</span> = would be superseded by ADR-0056
+        64 ADRs · <span className="text-amber-400">Accepted</span> = unchanged · <span className="text-blue-400">Proposed</span> = new · <span className="text-orange-400">Replaced</span> = would be superseded by ADR-0056
       </p>
 
       <div className="border border-orange-900/40 bg-orange-950/20 px-4 py-3 mb-6 text-xs font-mono text-orange-300/70">
         Share the "Copy all context" bundle with an agent to give it the full picture: principles,
-        all 56 ADRs, and the commercial strategy. The agent will see which decisions are unchanged
+        all 64 ADRs, and the commercial strategy. The agent will see which decisions are unchanged
         and which the card design would replace.
       </div>
 

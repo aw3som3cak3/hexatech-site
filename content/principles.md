@@ -26,7 +26,8 @@ without benefit. Allergies and anticoagulants pass; blood type fails.
 **Rationale:** Medics need seconds-to-read, consistent data; clinicians record inconsistently;
 coded data can be shown in the medic's language.
 **Test:** Is the field coded from a closed list, in a fixed position, with explicit state
-(known-none / not recorded / present / withheld)? Is there any free text in Tier 1? (Must be no.)
+(known-none / not recorded / present / withheld)? Is there any free text in Tier 1?
+(Exception: `RED_FLAG` is bounded free text, max 80 chars — see ADR-0046.)
 
 ### P5 — The owner controls content, down to zero
 **Rationale:** Data minimisation and genuine consent. In sovereign mode a nation may mandate a
