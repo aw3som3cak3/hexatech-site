@@ -2,8 +2,10 @@ import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import DecisionsV2Client from './DecisionsV2Client'
 import CopyButton from '../decisions/[id]/CopyButton'
+import { parseAdrsV2 } from '../lib/parseAdrs'
 
 const CONTENT = join(process.cwd(), 'content')
+const ADR_DIR = join(CONTENT, 'adr')
 
 function buildFullContext(): string {
   const parts: string[] = []
@@ -21,14 +23,11 @@ a formal acceptance decision is made.
 
   parts.push(readFileSync(join(CONTENT, 'principles.md'), 'utf-8'))
 
-  const adrFiles = readdirSync(join(CONTENT, 'adr'))
-    .filter(f => f.endsWith('.md'))
-    .sort()
+  const adrFiles = readdirSync(ADR_DIR).filter(f => f.endsWith('.md')).sort()
   for (const f of adrFiles) {
-    parts.push(readFileSync(join(CONTENT, 'adr', f), 'utf-8'))
+    parts.push(readFileSync(join(ADR_DIR, f), 'utf-8'))
   }
 
-  // include strategy doc if present
   try {
     parts.push(readFileSync(join(CONTENT, 'strategy.md'), 'utf-8'))
   } catch { /* not yet synced — skip */ }
@@ -40,7 +39,7 @@ a formal acceptance decision is made.
 
 export default function DecisionsV2Page() {
   const fullContext = buildFullContext()
-  const replaced = fullContext.match(/Replaced/g)?.length ?? 0
+  const adrs = parseAdrsV2(ADR_DIR)
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 w-full">
@@ -54,16 +53,16 @@ export default function DecisionsV2Page() {
         <CopyButton text={fullContext} label="Copy all context for agent" />
       </div>
       <p className="text-zinc-500 text-sm mb-4">
-        64 ADRs · <span className="text-amber-400">Accepted</span> = unchanged · <span className="text-blue-400">Proposed</span> = new · <span className="text-orange-400">Replaced</span> = would be superseded by ADR-0056
+        {adrs.length} ADRs · <span className="text-amber-400">Accepted</span> = unchanged · <span className="text-blue-400">Proposed</span> = new · <span className="text-orange-400">Replaced</span> = would be superseded by ADR-0056
       </p>
 
       <div className="border border-orange-900/40 bg-orange-950/20 px-4 py-3 mb-6 text-xs font-mono text-orange-300/70">
         Share the "Copy all context" bundle with an agent to give it the full picture: principles,
-        all 64 ADRs, and the commercial strategy. The agent will see which decisions are unchanged
+        all {adrs.length} ADRs, and the commercial strategy. The agent will see which decisions are unchanged
         and which the card design would replace.
       </div>
 
-      <DecisionsV2Client />
+      <DecisionsV2Client adrs={adrs} />
     </div>
   )
 }

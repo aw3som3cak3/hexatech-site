@@ -2,17 +2,17 @@
 import { join } from 'path'
 import DecisionsClient from './DecisionsClient'
 import CopyButton from './[id]/CopyButton'
+import { parseAdrs } from '../lib/parseAdrs'
 
 const CONTENT = join(process.cwd(), 'content')
+const ADR_DIR = join(CONTENT, 'adr')
 
 function buildFullContext(): string {
   const parts: string[] = []
   parts.push(readFileSync(join(CONTENT, 'principles.md'), 'utf-8'))
-  const adrFiles = readdirSync(join(CONTENT, 'adr'))
-    .filter(f => f.endsWith('.md'))
-    .sort()
+  const adrFiles = readdirSync(ADR_DIR).filter(f => f.endsWith('.md')).sort()
   for (const f of adrFiles) {
-    parts.push(readFileSync(join(CONTENT, 'adr', f), 'utf-8'))
+    parts.push(readFileSync(join(ADR_DIR, f), 'utf-8'))
   }
   parts.push(readFileSync(join(CONTENT, 'open-questions.md'), 'utf-8'))
   return parts.join('\n\n---\n\n')
@@ -20,6 +20,7 @@ function buildFullContext(): string {
 
 export default function DecisionsPage() {
   const fullContext = buildFullContext()
+  const adrs = parseAdrs(ADR_DIR)
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 w-full">
       <div className="flex items-start justify-between mb-1 gap-4">
@@ -27,9 +28,9 @@ export default function DecisionsPage() {
         <CopyButton text={fullContext} label="Copy all context for agent" />
       </div>
       <p className="text-zinc-500 text-sm mb-6">
-        64 architecture decision records · click a title to read and copy individually
+        {adrs.length} architecture decision records · click a title to read and copy individually
       </p>
-      <DecisionsClient />
+      <DecisionsClient adrs={adrs} />
     </div>
   )
 }

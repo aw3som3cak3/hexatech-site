@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { adrs, AdrStatus } from './data'
+import type { AdrMeta, AdrStatus } from '../lib/parseAdrs'
 
 const STATUS_STYLES: Record<AdrStatus | 'All', string> = {
   All:        'border-zinc-700 text-zinc-400',
@@ -18,7 +18,7 @@ const BADGE: Record<AdrStatus, string> = {
 
 const FILTERS: Array<AdrStatus | 'All'> = ['All', 'Accepted', 'Proposed', 'Superseded']
 
-export default function DecisionsClient() {
+export default function DecisionsClient({ adrs }: { adrs: AdrMeta[] }) {
   const [filter, setFilter] = useState<AdrStatus | 'All'>('All')
   const visible = filter === 'All' ? adrs : adrs.filter(a => a.status === filter)
 

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { adrs, AdrStatus } from './data-v2'
+import type { AdrMetaV2, AdrStatusV2 } from '../lib/parseAdrs'
 
-const STATUS_STYLES: Record<AdrStatus | 'All', string> = {
+const STATUS_STYLES: Record<AdrStatusV2 | 'All', string> = {
   All:        'border-zinc-700 text-zinc-400',
   Accepted:   'border-amber-500 text-amber-400',
   Proposed:   'border-blue-500 text-blue-400',
@@ -11,17 +11,17 @@ const STATUS_STYLES: Record<AdrStatus | 'All', string> = {
   Superseded: 'border-zinc-600 text-zinc-500',
 }
 
-const BADGE: Record<AdrStatus, string> = {
+const BADGE: Record<AdrStatusV2, string> = {
   Accepted:   'bg-amber-400/10 text-amber-400 border border-amber-400/20',
   Proposed:   'bg-blue-400/10 text-blue-400 border border-blue-400/20',
   Replaced:   'bg-orange-400/10 text-orange-400 border border-orange-400/20',
   Superseded: 'bg-zinc-800 text-zinc-500 border border-zinc-700',
 }
 
-const FILTERS: Array<AdrStatus | 'All'> = ['All', 'Accepted', 'Proposed', 'Replaced', 'Superseded']
+const FILTERS: Array<AdrStatusV2 | 'All'> = ['All', 'Accepted', 'Proposed', 'Replaced', 'Superseded']
 
-export default function DecisionsV2Client() {
-  const [filter, setFilter] = useState<AdrStatus | 'All'>('All')
+export default function DecisionsV2Client({ adrs }: { adrs: AdrMetaV2[] }) {
+  const [filter, setFilter] = useState<AdrStatusV2 | 'All'>('All')
   const visible = filter === 'All' ? adrs : adrs.filter(a => a.status === filter)
 
   return (
