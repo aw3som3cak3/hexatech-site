@@ -32,7 +32,8 @@ const SCENE_GROUPS = [
       { id: 'card-assembly', label: 'Card + Surround', bg: '#1e293b' },
       { id: 'card-full',     label: 'Full Set',        bg: '#1e293b' },
       { id: 'card-worn',     label: 'Worn',            bg: '#1e293b' },
-      { id: 'card-grommet',  label: 'Grommet' },
+      { id: 'card-grommet',      label: 'Grommet' },
+      { id: 'card-electronics',  label: 'Electronics' },
     ],
   },
   {
