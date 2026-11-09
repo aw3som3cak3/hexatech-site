@@ -1,6 +1,6 @@
 # ADR-0057: V2 chip access model — unauthenticated reader policy, UUID persistence, and authentication verification
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-05
 - **Principles:** P1, P2, P5, P9, P10
 - **Amends:** ADR-0024 (silent chip — deployment-mode exception), ADR-0056 (public partition spec)

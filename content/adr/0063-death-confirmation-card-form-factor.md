@@ -1,6 +1,6 @@
 # ADR-0063: Death confirmation — card form factor (amends ADR-0056, ADR-0023)
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-09
 - **Principles:** P1, P8, P9
 - **Amends:** ADR-0056 (adds death confirmation section)

@@ -1,6 +1,6 @@
 # ADR-0059: Chip consolidation — JCOP 4 for all Hexa variants; DUOX deferred
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-09
 - **Principles:** P1, P2, P6, P10
 - **Supersedes:** ADR-0058 (chip evaluation — MIFARE DUOX for Hexa, JCOP for Hexa Trinium)

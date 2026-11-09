@@ -1,6 +1,6 @@
 # ADR-0062: Tag and tear-away data model — card form factor
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-09
 - **Principles:** P1, P2, P3, P5
 - **Amends:** ADR-0056 (adds data model section)

@@ -91,17 +91,11 @@ Tag Locator at a bare-eye-readable character height. The grommet carries the **f
 6 Crockford characters of the Tag Locator**, die-struck to ≥ 0.3 mm physical relief depth.
 Readable with a 10× loupe under raking light after fire exposure. Treat as forensic fallback
 for laboratory identification; bare-eye field identification relies on the tear-away face.
-A 6-char prefix spans ~30 bits (Crockford base32). At 10 K enrolled individuals the birthday
-collision probability is ~4.5% — the prefix is not guaranteed unique by space alone. The enrollment
-system must enforce prefix uniqueness within the lookup scope, or explicitly support ambiguous
-forensic lookup with disambiguation by SURNAME, UNIT, or deployment context. The grommet
-abbreviated locator carries no check character; a misread from a fire-damaged part is not
-self-detecting. Registry disambiguation by name and unit is the correction path — make this
-explicit in the enrollment system specification.
+A 6-char prefix spans ~30 bits (Crockford base32). At 10 K enrolled individuals the birthday collision probability is ~4.5% — the prefix is not guaranteed unique by space alone. Per ADR-0060 Decision 4, the enrollment system must enforce prefix uniqueness by re-rolling the Enrollment ID until a unique 6-character prefix is obtained; ambiguous forensic lookup is not an accepted fallback. The grommet abbreviated locator carries no check character; a misread from a fire-damaged part is not self-detecting. Registry lookup with disambiguation by name and unit remains the confirmation path.
 The full 11-char Tag Locator is engraved on the tear-away face (bare-eye field read).
 Minimum character height on the grommet flange: ≥ 1.5 mm at mid-ring radius (confirm
 in CAD before die specification is issued).
-**Grommet engraving method:** die-struck to ≥ 0.3 mm physical relief depth on a rotary fixture (CNC mill or die press). **DFM check required before die specification:** stamping 0.3 mm relief into a 0.8 mm flange may distort the flange geometry or bore tolerance; have the machinist confirm feasibility and inspect bore concentricity after a pilot run. The grommet is engraved pre-assembly, individually matched to its designated card assembly, and recorded in the enrollment transaction. Enrolled grommets must be tracked through assembly — no generic pre-engraving.
+**Grommet engraving method:** ≥ 0.3 mm relief depth; method (die-striking or CNC engraving) chosen after the DFM check. **DFM check required before die specification:** stamping 0.3 mm relief into a 0.8 mm flange may distort the flange geometry or bore tolerance; have the machinist confirm feasibility and inspect bore concentricity after a pilot run. The grommet is engraved against its designated Enrollment ID (allocated in enrollment step 1), matched to its card assembly, and recorded in the enrollment transaction. Enrolled grommets must be tracked through assembly — no generic pre-engraving.
 
 **Card grommet:** barrel height = 3.5 mm (CARD_T). **Tear-away grommet:** barrel height =
 2.5 mm (TOKEN_T). Both have 0.8 mm flanges on each face. Chain bore through both elements
@@ -188,6 +182,8 @@ the reader geometry is unknown (e.g. automated gate reader).
 card reversed — reader on ferrite/back face — and (config F) tear-away in front of card without
 moving aside. Both are expected fails; they document the design's known orientation sensitivity.
 
+**Gate 1 iOS test harness:** ADR-0065 measurement 9 requires a real iPhone (Core NFC). ADR-0034 defers the full iOS medic app. The Gate 1 iPhone test uses a minimal Core NFC test harness — an app that selects the Hexa AID, exchanges APDUs, and records transaction outcomes. This harness does not need to implement the emergency display UI; it validates the NFC transaction layer only.
+
 ### Why no NFC on the tear-away
 
 Adding NFC to the tear-away would require keeping two chips with medical data
@@ -225,8 +221,11 @@ tear-away is enrolled in the same controlled transaction but is a physically sep
 
 **Enrollment sequence (not a single atomic write — a controlled transaction with readback verification):**
 
-1. Allocate Enrollment ID in the enrollment system registry.
-2. Engrave remaining physical carriers (tear-away face fiber-laser ≥ 0.3 mm depth; card face printed). Note: grommet flanges were die-struck pre-assembly and are already matched to their designated assemblies at this point — the grommet is not engraved at this step, only assembled.
+1. Allocate Enrollment ID in the enrollment system registry; derive Tag Locator; validate Tag Locator and 6-character prefix uniqueness per ADR-0060 Decision 4.
+2. Engrave physical carriers:
+   a. Die-strike or CNC-engrave grommet flanges (abbreviated Tag Locator — first 6 Crockford chars) at ≥ 0.3 mm relief depth; inspect bore concentricity. Any grommet that fails inspection must be physically defaced (engrave REJECTED or equivalent) and recorded as rejected in the enrollment system before a replacement grommet is substituted.
+   b. Fiber-laser engrave tear-away face (full 11-char Tag Locator, identity fields) at ≥ 0.3 mm depth.
+   c. Print/engrave card face (Tag Locator, identity fields).
 3. Assemble: press-fit grommet into card; bond silicone surround.
 4. Personalise the JCOP chip: write Enrollment ID, configure partitions, provision keys.
 5. Readback verification: scan card; verify Tag Locator on chip matches grommet engraving and matches enrollment registry entry.
@@ -390,18 +389,11 @@ military ID.
    specs must update the antenna aperture reference from "flat hexagonal 2-turn coil, 48 mm
    aperture" to "~50–51 mm aperture" to match the 54 mm body.
 
-9. **NFC power budget:** EE review (2026-11-09) identified V_oc ≈ 0.5 V at H_min = 1.5 A/m
-   (ISO 14443-2 standard obligation for ISO 14443-4 certified chips; see H_min reference below).
+9. **NFC power budget:** EE review (2026-11-09) identified V_oc ≈ 0.5 V using H_min = 1.5 A/m
+   as a provisional design assumption (see H_min reference below).
    The derating calculation is documented here:
 
-   **H_min reference (provisionally closed on ISO 14443-2; PICC class confirmation required):** field-strength requirements for PICCs are in
-   ISO/IEC 14443-2 (RF power and signal interface). A compliant PICC must operate at H_min depending
-   on PICC class: 1.5 A/m applies to PICC classes 1–3; classes 4–6 have higher H_min values. The
-   P71D600's exact PICC class must be confirmed with NXP before the power budget is finalized.
-   The current calculation uses 1.5 A/m as a provisional estimate; if the P71D600 is a higher PICC
-   class, the power margin may be tighter than calculated. ADR-0065 measurement 11
-   (calibrated field generator) is optional — if equipment is available it provides useful data,
-   but it is not a Gate 1 pass criterion.
+   **H_min reference (design assumption — pending coil classification):** field-strength requirements for PICCs are in ISO/IEC 14443-2 (RF power and signal interface) and depend on PICC antenna class, which is determined by the antenna coil geometry (ISO 14443-1 defines PICC antenna class zones). **Unverified design assumption:** 1.5 A/m is used as the H_min estimate in the power budget. To confirm this, classify the ~50 mm hex coil against the PICC antenna class zones in ISO 14443-1 and take the applicable H_min from ISO 14443-2 for that class. This is an antenna geometry determination, not a chip datasheet lookup — NXP cannot answer the class question. If the coil falls into a higher PICC class with a stricter H_min, the power budget must be recalculated. ADR-0065 measurement 11 (calibrated field generator) is optional — if equipment is available it provides useful data, but it is not a Gate 1 pass criterion.
 
    At resonance with matched load, chip terminal voltage ≈ Q × V_oc / 2.
    - Free air (Q = 20): V_chip ≈ 20 × 0.5 / 2 = **5.0 V** — well above chip minimum.
@@ -409,9 +401,8 @@ military ID.
      Q_min ≈ 20 × 0.75 × 0.90 = 13.5. V_chip ≈ 13.5 × 0.5 / 2 = **3.4 V** — positive margin.
    - Ferrite sheet increases effective L by ~5–10%, raising V_oc to ~0.52–0.55 V: margin widens slightly.
 
-   Conclusion: **loaded Q 15–35 (chip attached) is the critical Gate 1 margin parameter.** Q < 15
-   risks insufficient chip voltage; Q > 35 attenuates the 847 kHz load-modulation sidebands.
-   Loaded Q 15–35 (config B, grommet installed) is a hard Gate 1 pass criterion (ADR-0065 measurement 3).
+   Conclusion: **loaded Q 15–35 (chip attached) is the critical Gate 1 design target.** Q < 15 risks insufficient chip voltage; Q > 35 attenuates the 847 kHz load-modulation sidebands.
+   **Q criterion (aligned with ADR-0065):** loaded Q 15–35 is a design target / diagnostic range, not a Gate 1 pass/fail criterion. ADR-0065 gates on activation range (measurements 4, 6, 8) and transaction completion (measurement 9). Measured Q is recorded and reported to the inlay vendor for tuning.
    The V_chip calculation above is a sanity estimate, not a
    closed budget — actual performance depends on coupling, loading, resonance, and chip power
    consumption in the assembled device. **Power budget status: provisionally estimated, pending

@@ -1,6 +1,6 @@
 # ADR-0061: Consumer Tier 1 access and sovereign mode split — amending ADR-0057 Decision 1
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-09
 - **Principles:** P1, P5, P9
 - **Amends:** ADR-0057 Decision 1 (unauthenticated reader policy)
