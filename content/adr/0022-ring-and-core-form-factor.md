@@ -1,6 +1,6 @@
 # ADR-0022: Ring-and-core form factor (partner design)
 
-- **Status:** Accepted (supersedes ADR-0021; self-amended 2026-11-01: wear position and chip B antenna note added)
+- **Status:** Accepted (supersedes ADR-0021; self-amended 2026-11-01: wear position and chip B antenna note added; amended by ADR-0038, ADR-0042, ADR-0045, ADR-0048)
 - **Date:** 2026-10-05
 - **Principles:** P1, P2, P10
 

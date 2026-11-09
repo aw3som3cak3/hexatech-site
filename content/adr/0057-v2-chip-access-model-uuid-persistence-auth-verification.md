@@ -146,12 +146,13 @@ require device-attested user verification before the applet responds. ✓
 attestation frameworks (Android StrongBox, iOS Secure Enclave) are established standards.
 Any deviation must be in a subsequent applet-specification ADR. ✓
 
-## Open questions resolved by this ADR
+## Open questions this ADR addresses
 
-- Partially resolves **OQ-26** (unauthenticated reader policy — see open-questions.md):
-  Decision 1 specifies the policy; applet implementation detail deferred to a subsequent ADR.
-- Partially resolves **OQ-27** (UUID persistence mechanism): Decision 2 establishes the
-  requirement; enrollment system design is a subsequent ADR.
+- Specifies the unauthenticated reader access policy (Decision 1). Note: the consumer
+  mode P1 exception and consumer mode casualty log access are further refined by
+  ADR-0061; residual gap tracked as OQ-30 and OQ-31.
+- Specifies UUID persistence requirements (Decision 2). Full identifier model defined
+  by ADR-0060.
 - Opens a new gap: the applet-specification ADR for the authentication function.
 
 ## What this ADR does not resolve

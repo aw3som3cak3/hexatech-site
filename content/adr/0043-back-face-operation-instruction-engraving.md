@@ -1,6 +1,6 @@
 # ADR-0043: Back-face operation instruction engraving — TURN ↺ PULL
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR-0050
 - **Date:** 2026-11-04
 - **Principles:** P2, P5
 - **Supersedes:** —

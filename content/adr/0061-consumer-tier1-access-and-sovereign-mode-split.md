@@ -46,13 +46,49 @@ The access sequence for consumer mode:
 2. Any NFC reader sends `READ_TIER1` → receives the signed Tier 1 emergency profile.
 
 The Tier 1 response is **chip-signed**: the JCOP applet signs the response with the
-chip's enrollment key pair. This means every Tier 1 read produces an attributable,
-verifiable record — satisfying P1's "mutually signed, attributable record" requirement —
-without requiring the reader to hold any credential.
+chip's enrollment key pair. This establishes that the data came from a known enrolled chip
+and was not modified in transit. It does not establish who read the chip.
 
-This is consistent with ADR-0019 (consumer Tier 1 signed, not encrypted). ADR-0019 established
-the signed-not-encrypted invariant; this ADR specifies the JCOP applet behaviour that
-implements it.
+This is consistent with ADR-0019 (consumer Tier 1 signed, not encrypted).
+
+### Decision 1a — Explicit P1 exception for consumer mode
+
+P1 requires that "every access must be signed, counted and later logged." Consumer mode
+satisfies the break-glass and chip-signing aspects of P1 but **does not satisfy P1's
+full attribution and log-delivery requirements**:
+
+| P1 property | Consumer mode | Sovereign mode |
+|---|---|---|
+| Offline Tier 1 access | ✓ | ✓ |
+| Chip-signed response | ✓ | ✓ |
+| Reader identity in receipt | ✗ — reader is anonymous | ✓ — terminal cert required |
+| Mutually signed receipt | Optional (if reader supports) | Mandatory |
+| Log delivery | Best-effort | Required protocol objective |
+
+The gap is accepted for consumer mode in the same spirit that ADR-0036 accepted a
+consumer-mode identifier exception: the deployment context (civilian bystander with no
+PKI) makes full P1 attribution structurally impossible. The alternative — requiring
+reader authentication in consumer mode — defeats break-glass for the target scenario.
+
+This exception must be:
+1. Documented in the user-facing deployment guide for consumer deployments.
+2. Acknowledged by the deployment authority at enrollment time.
+3. Revisited if consumer deployments scale to contexts with accountability expectations
+   (e.g., civilian emergency services with device management).
+
+See OQ-30 for residual tracking of this attribution gap.
+
+### Decision 1b — NFC interaction model: app required vs NDEF fallback (open)
+
+iOS devices cannot read a custom ISO 7816 applet response without an installed app that
+declares the applet's AID via Core NFC. "Any NFC phone" in consumer mode therefore means
+"any phone with the Hexa app installed" if the emergency profile is served only via the
+JCOP applet layer.
+
+An NDEF record fallback (readable by any iOS device without an app) would extend reach
+to genuine bystander scenarios but introduces different security properties.
+
+This design decision is unresolved. See OQ-32.
 
 ### Decision 2 — Sovereign mode: terminal authentication gates Tier 1 and above
 
@@ -100,10 +136,12 @@ the record. ADR-0046 is Accepted and applies to the authenticated Tier 1 respons
 ## Principle tests
 
 **P1 (break-glass offline; attributable):**
-Consumer Tier 1 is returned to any NFC reader with no network and no terminal cert.
-The chip signs the response; every read produces an attributable record. Break-glass access
-for the bystander-with-a-phone scenario is preserved. Sovereign mode preserves the
-terminal-cert gate for controlled deployments. ✓
+Consumer Tier 1 is returned to any NFC reader with no network and no terminal cert —
+break-glass is preserved. The chip signs the response; the signed payload proves the data
+came from a known chip and was not modified. However, the reader remains anonymous; a
+chip signature alone is not a "mutually signed, attributable record" in P1's full sense.
+This ADR takes an explicit P1 exception for consumer mode (Decision 1a). Sovereign mode
+satisfies P1 in full. ⚠ (consumer mode — P1 exception, Decision 1a); ✓ (sovereign mode)
 
 **P5 (owner controls content, down to zero):**
 Deployment mode is chosen by the enrollment authority, not Hexatec. Within consumer mode,

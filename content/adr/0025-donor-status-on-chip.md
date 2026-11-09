@@ -1,6 +1,6 @@
 # ADR-0025: Donor status on chip only, signed and expiring
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-05
 - **Principles:** P3
 

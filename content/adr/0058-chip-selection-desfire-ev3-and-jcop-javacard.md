@@ -1,6 +1,6 @@
 # ADR-0058: Chip evaluation and selection — MIFARE DUOX for Hexa, JCOP for Hexa Trinium
 
-- **Status:** Proposed
+- **Status:** Superseded by ADR-0059
 - **Date:** 2026-11-06 (revised 2026-11-06)
 - **Principles:** P1, P2, P6, P10
 - **Depends on:** ADR-0003 (NFC secure element), ADR-0057 (V2 chip access model)

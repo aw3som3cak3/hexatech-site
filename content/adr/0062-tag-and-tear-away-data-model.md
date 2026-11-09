@@ -12,9 +12,9 @@
 
 ## Context
 
-ADR-0056 defines the physical form factor — a 54 mm hexagonal JCOP card on a neck chain
-with a 316L stainless hexagonal tear-away — but does not formally specify what data each
-physical element holds. This gap leaves open which element carries the casualty log, what
+ADR-0056 defines the physical form factor — a JCOP hexagonal card (54 mm across-corners)
+on a neck chain with a 316L stainless hexagonal tear-away — but does not formally specify
+what data each physical element holds. This gap leaves open which element carries the casualty log, what
 the tear-away stores electronically, and how the data model relates to the identifier model
 in ADR-0060.
 
@@ -29,30 +29,43 @@ form factor is revisited.
 ### Decision 1 — The tag (JCOP hex card) is the sole electronic element
 
 The JCOP card is the only element in the card form factor that carries electronic storage
-and NFC communication capability. It holds:
+and NFC communication capability. It holds four distinct **applet domains** (storage
+partitions with separate access control rules). These are not the medical data tiers from
+ADR-0001 — do not confuse them. Tier 1 (offline emergency profile) and Tier 2 (extended
+medical / identity) are ADR-0001 concepts describing data content and confidentiality
+levels; the applet domains below describe how data is organised inside the JCOP applet.
 
-**Tier 0 — Session and authentication state**
+**Session domain** (unauthenticated read)
 - Session token (random, per power cycle — ADR-0060 Decision 3)
 - Deployment mode flag (consumer / sovereign — ADR-0061 Decision 3)
 - JCOP hardware key pair and chip certificate (chip identity, not exposed as person UUID)
+- Access: returned to any reader with no authentication; this is the only data returned
+  before terminal authentication or owner verification
 
-**Tier 1 — Emergency profile**
+**Emergency domain** (Tier 1 — ADR-0001)
 - Signed HL7 FHIR IPS emergency profile (ADR-0016)
 - Read access per ADR-0061: unauthenticated in consumer mode; terminal-cert gated in
   sovereign mode
+- Owner verification never required for read (P9 / break-glass)
 
-**Tier 2 — Identity and attestations**
-- Enrollment ID (ADR-0060 Decision 1)
-- Pairwise RP ID derivation material
-- Identity attestations (national ID pointers, mdoc / SD-JWT VC — ADR-0013)
-- Owner verification required
+**Identity domain** (Tier 2 — ADR-0001)
+- Enrollment ID (ADR-0060 Decision 1) — accessible to authenticated terminals
+  **without** owner verification; required for emergency identification of an unconscious
+  person (a hospital must be able to look up the patient record from the chip without
+  the patient's PIN or biometric)
+- Pairwise RP ID derivation material — accessible to authenticated terminals without
+  owner verification
+- Identity attestations (national ID pointers, mdoc / SD-JWT VC — ADR-0013) —
+  owner verification required
+- Signing operations — owner verification required
 
-**Tier 3 — Casualty log**
+**Casualty log domain**
 - Append-only log of treatment events, each chip-signed (ADR-0008)
 - Must travel with the person — placing the log on the tag (which remains on the neck
   chain with the person) satisfies ADR-0008's physical co-location requirement
-- Owner verification not required for append (a medic appends without owner consent,
-  per P9 — casualty-log append is an authorised third-party write)
+- Append access in sovereign mode: requires terminal authentication (medic PKI);
+  owner verification not required (medic appends without patient consent, per P9)
+- Append access in consumer mode: unresolved — see OQ-31
 
 ### Decision 2 — The tear-away is a passive physical identifier; it holds no electronic data
 
@@ -102,10 +115,12 @@ is used for this form factor.
 ## Principle tests
 
 **P1 (break-glass offline; attributable):**
-The JCOP tag carries both Tier 1 emergency profile and the casualty log. Both are
-accessible offline (tag is passively powered). Consumer Tier 1 is unauthenticated per
-ADR-0061. The tag stays with the person even when the tear-away is separated. A medic
-arriving at any point can read a complete, up-to-date record from the tag. ✓
+The JCOP tag carries both the emergency domain (Tier 1) and the casualty log. Both are
+accessible offline (tag is passively powered). The tag stays with the person even when
+the tear-away is separated. A medic arriving at any point can read a complete, up-to-date
+record from the tag. Consumer Tier 1 is unauthenticated per ADR-0061; full P1 attribution
+in consumer mode requires an explicit exception — see ADR-0061 and OQ-30. ✓ (sovereign);
+Partial (consumer — see ADR-0061)
 
 **P2 (tag is cache, not identity):**
 The tag can be replaced without data loss: the account holds the person's data; a new JCOP

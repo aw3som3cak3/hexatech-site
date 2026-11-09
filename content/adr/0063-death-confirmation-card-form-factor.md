@@ -39,16 +39,44 @@ by physical separation of two chips:
    `declare_death(signed_payload, person_a_credential)`
    The applet stores the declaration with status `PENDING_COUNTERSIGN`.
 
-2. **Person B** (officer, chaplain, or mortuary specialist — a second distinct authenticated
-   identity) connects to the same tag in a separate session and countersigns the declaration:
+2. **Person B** (officer, chaplain, or mortuary specialist) connects to the same tag in
+   a separate session and countersigns the declaration:
    `countersign_death(signed_payload, person_b_credential)`
-   The applet verifies that Person B's credential is distinct from Person A's and that
-   Person B is authorised for this role. Status moves to `CONFIRMED`.
+   The applet verifies (a) that Person B's **certificate subject** differs from Person A's,
+   and (b) that Person B holds a certificate scoped to an authorised countersign role
+   (e.g., a DV-level terminal certificate with a role attribute indicating MORTUARY,
+   CHAPLAIN, or COMMANDING_OFFICER). Credential number inequality alone is not sufficient
+   — a single individual may legitimately hold credentials on multiple devices. Status
+   moves to `CONFIRMED`.
 
 3. Only `CONFIRMED` status triggers casualty reporting on sync (unchanged from ADR-0023).
 
-The applet enforces that the same credential cannot perform both steps. Identity distinctness
-is verified against enrolled deployment credentials, not merely different NFC sessions.
+The applet enforces that the same certificate subject cannot perform both steps, and that
+each step requires a role-scoped credential. The two-person rule is enforced over verified
+human principals, not over device or credential counts.
+
+### Decision 1a — Death confirmation requires sovereign mode
+
+The death confirmation mechanism defined in Decision 1 requires role-scoped terminal
+certificates (DV-level, with role attributes). This PKI structure exists only in sovereign
+deployments. Consumer mode has no terminal PKI and cannot support role-scoped credentials.
+
+**Death confirmation is a sovereign-mode-only function.** Consumer deployments do not
+support two-key death confirmation. If a person enrolled in consumer mode is a casualty,
+the reporting chain relies on physical identification (tear-away engraving) and manual
+administrative processes. The JCOP applet in consumer mode need not implement the death
+confirmation state machine.
+
+### Decision 1b — Tear-away doctrine for the card form factor
+
+ADR-0023 for the ring form factor states that "the core is not released for the wounded —
+only for confirmed KIA." This doctrine is restated for the card form factor:
+
+**The tear-away is not pulled from a living person who is wounded.** The tear-away is
+pulled only from a person confirmed as KIA. It serves as a physical reporting token for
+the confirming authority; the JCOP tag remains on the person's body in all cases.
+
+This preserves the same doctrine intent as ADR-0023 for the two-piece ring form factor.
 
 ### Decision 2 — The JCOP applet is the trust anchor for both signatures
 

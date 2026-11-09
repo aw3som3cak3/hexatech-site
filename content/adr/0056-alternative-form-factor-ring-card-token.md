@@ -1,7 +1,7 @@
 # ADR-0056: Alternative physical form factor — NFC hex card + 316L steel tear-away
 
 - **Status:** Proposed
-- **Date:** 2026-11-04
+- **Date:** 2026-11-04 (revised 2026-11-09)
 - **Principles:** P1, P2, P3
 - **Acceptance dependency:** ADR-0057 (chip access model, UUID persistence, auth verification) must be Accepted before this ADR can be accepted. The public partition specification below is amended by ADR-0057 Decision 1.
 - **Would supersede (if accepted):** ADR-0022 (ring-and-core), ADR-0038 (Chip A ring-only),
@@ -10,6 +10,8 @@
   ADR-0048 (Ti shell + PEEK inner carrier), ADR-0049/0054 (UUID cylinder + break-off plate)
 - **Preserves (unchanged if accepted):** ADR-0003 (secure element), ADR-0016 (IPS profile),
   ADR-0052 (validation gates — test criteria updated), all digital-layer ADRs 0001–0039
+- **Death confirmation:** two-key principle from ADR-0023 preserved via JCOP applet state
+  machine — see ADR-0063
 
 ## Context
 
@@ -29,7 +31,7 @@ proven, manufactured form factor. Two elements on a neck chain. One stays with t
 one goes with the reporting chain. Personnel worldwide know the doctrine without training.
 
 **The simplest system that satisfies all requirements** is two hexagonal elements, both
-~48 mm across-corners (equivalent area to a standard US dog tag, 51 × 29 mm):
+54 mm across-corners (see Decision — card size below):
 
 1. A plastic NFC card — electronics carrier, stays with the person
 2. A 316L stainless steel tear-away — physical identity token, goes with the reporting chain
@@ -38,13 +40,16 @@ one goes with the reporting chain. Personnel worldwide know the doctrine without
 
 ### Element 1 — NFC hex card (stays with person)
 
-- **Body:** PC/PETG laminate, 48 mm across-corners, 3.5 mm thick, chamfered edges
-- **Electronics:** single JCOP secure element (NXP SE050 or Infineon SECORA) with
-  two logical partitions:
+- **Body:** PC/PETG laminate, 54 mm across-corners, 3.5 mm thick, chamfered edges;
+  hex orientation: pointy-top (one vertex at +Y / chain hole, one vertex at −Y)
+- **Electronics:** JCOP 4 (JavaCard 3.0.5 / GP 2.3.1) — chip selection per ADR-0059;
+  chip has two logical partitions:
   - **Public partition** (unauthenticated read): random session identifier only — see ADR-0057 Decision 1 for the amended policy (original: SURNAME, UUID, red-flag line — not adopted; conflicts with ADR-0024)
   - **Protected partition** (authenticated read): full Tier 1 medical profile per ADR-0016
-- **Antenna:** flat hexagonal 2-turn coil wound inside the laminate body; 48 mm aperture
-  provides read range ≥ 2 cm (ADR-0052 Gate 1 criterion)
+- **Antenna:** flat hexagonal 2-turn coil wound inside the laminate body; ~50–51 mm AC
+  effective aperture; tuning capacitor specified to hold resonant frequency at 14.5–15 MHz
+  (intentional detuning for 2–4 cm range control); provides read range ≥ 2 cm (ADR-0052
+  Gate 1 criterion); 10 mm OD keep-out zone around grommet bore
 - **Face engraving:** SURNAME / GIVEN NAME / UUID (8+8) / UNIT — laser marked or
   hot-embossed; not fire-survivable but provides quick visual read without scanning
 - **Surround:** silicone hex edge gasket (modified dog-tag silencer form), ~1.8 mm wall,
@@ -64,15 +69,27 @@ The grommet is pressed into the card's chain hole and serves two independent fun
    identifier — equivalent in function to the UUID cylinder in the previous design
    (ADR-0049/0054), but integrated directly into the card rather than being a separate element.
 
-Grommet specification: 316L stainless, double-flange, ~8 mm flange OD, 3.5 mm bore,
-UUID laser-engraved on front flange face.
+Grommet specification: 316L stainless, double-flange, 9 mm flange OD, 3.5 mm bore.
+UUID laser-engraved on front flange face. Positioned 1.5 mm inside the nearest hex
+vertex boundary (chain-hole vertex = +Y vertex, pointy-top hex orientation).
+
+**Card grommet:** barrel height = 3.5 mm (CARD_T). **Tear-away grommet:** barrel height =
+2.5 mm (TOKEN_T). Both have 0.8 mm flanges on each face. Chain bore through both elements
+is 3.5 mm diameter. The assembly has three independent UUID engravings: card grommet flange,
+tear-away grommet flange, tear-away engraved face.
+
+**RF constraint (EE review 2026-11-09):** NXP JCOP 4 operates at 13.56 MHz; a 316L
+grommet acts as a shorted conductive ring with skin depth ~0.12 mm. At ≤9 mm OD the antenna
+conductor can route around the grommet with minimal detour; above ~12–13 mm OD the detour
+becomes significant (~250 mm² aperture loss) and may require detuning to compensate. 9 mm OD
+is the upper end of the safe range; empirical RF verification required at PoC Gate 1.
 
 ### Element 2 — 316L steel tear-away (goes with reporting chain)
 
 The tear-away matches US dog-tag short-chain doctrine exactly: on a short chain attached
 to the main neck chain, easily separated by the first responder who encounters the person.
 
-- **Body:** 316L stainless steel, 48 mm across-corners (matches card outer size), 2.5 mm thick
+- **Body:** 316L stainless steel, 54 mm across-corners (matches card outer size), 2.5 mm thick
 - **No NFC chip** — the reporting chain does not need to scan; they need to record an
   identity and look it up in the casualty log system when connectivity is available
 - **Engraved fields (both faces):**
@@ -85,8 +102,12 @@ to the main neck chain, easily separated by the first responder who encounters t
 | UNIT / NATIONALITY | Routing the report; jurisdiction for remains processing |
 | Enrollment date | Age of the data; prompts re-enrollment if stale |
 
-- **Chain hole:** at top vertex, chamfered bore (no grommet needed — solid steel)
-- **Fire survival:** 316L melts at 1,375–1,400 °C; full identity fields survive structural fire
+- **Chain hole:** at the top (+Y) vertex; fitted with a 316L stainless double-flange grommet
+  (9 mm flange OD, 3.5 mm bore, 2.5 mm barrel to match TOKEN_T). The chain passes through
+  the steel bore, protecting the hex edge from wear when the tear-away is pulled free. UUID
+  is engraved on the grommet front flange face — matching the card grommet and the engraved
+  face, giving three independent UUID carriers on a single body.
+- **Fire survival:** 316L melts at 1,375–1,400 °C; grommet and full identity fields survive structural fire
 
 ### Why no NFC on the tear-away
 
@@ -117,6 +138,22 @@ Both elements are fire-survivable at structural fire temperatures. The Ti ring a
 (it was the most expensive element at $20–40) and introduced a third element to the system.
 Two elements with both carrying fire-survivable identifiers satisfies the requirement without
 the ring.
+
+## Sealed manufacturing unit
+
+The grommet, card, surround, and tear-away form a single manufacturing unit. At the enrollment
+event a UUID is written or engraved on all four carriers in one atomic transaction:
+
+1. **JCOP chip** — UUID written as the chip's enrollment identifier
+2. **Grommet flange face** — UUID laser-engraved (316L, fire-survivable)
+3. **Tear-away face** — UUID laser-engraved (316L, fire-survivable)
+4. **Card face** — UUID printed (PC laminate, visual read; not fire-survivable)
+
+The silicone surround is bonded at manufacture with mechanical retention (a 0.6–0.8 mm
+peripheral channel in the card laminate edge). The card is not removable without destroying the
+surround. PII (name, unit, allergies) is added to the tear-away and card face at personalisation,
+after UUID enrollment. Re-enrollment replaces the full unit; individual components are not swapped
+in the field.
 
 ## Separation doctrine
 
@@ -196,21 +233,71 @@ military ID.
 
 ## Open questions
 
-1. **Partitioned JCOP applet spec:** the public/protected partition boundary must be
-   formally specified. What exactly does an unauthenticated scan return? This amends
-   ADR-0038 and needs its own ADR before the prototype is built.
+1. ~~**Partitioned JCOP applet spec**~~ — resolved by ADR-0057 (access model and UUID
+   persistence) and ADR-0061 (consumer Tier 1 / sovereign mode split).
 
 2. **Tear-away engraving scope:** enrollment date is proposed; whether NATIONALITY or UNIT
    is the more useful routing field for the first deployment context (Försvarsmakten vs.
    humanitarian) should be resolved by OQ-1 (first customer).
 
-3. **Grommet UUID consistency:** the UUID on the grommet and on the card face must be
-   generated from the same enrollment event and must match the JCOP chip UUID. The
-   enrollment system must write all three in a single transaction. Procedure not yet defined.
+3. **Grommet UUID consistency:** the Tag Locator on the grommet and on the card face must be
+   generated from the same enrollment event and must match the Enrollment ID (ADR-0060 Decision 1
+   — account-bound, not derived from chip UUID). The enrollment system must write all three in
+   a single transaction. Procedure not yet defined.
 
 4. **Silicone surround tooling timing:** the injection mould lead time is 6–10 weeks.
    For the Phase A PoC, a 3D-printed or off-the-shelf silicone gasket should be identified
    as a temporary substitute. Prototype gate 1 (RF coupling) does not require the surround.
+   The card laminate edge must include a 0.6–0.8 mm peripheral channel for mechanical
+   retention of the silicone — this geometry must be in the card drawing before mould tooling
+   is ordered.
+
+5. **Single-piece vs two-piece body** *(resolved — not for pilot):* embedding the JCOP chip
+   and antenna directly in the surround material (Option B) was evaluated by ID and EE review
+   (2026-11-09). Both reviews recommend **two-piece (Option A)** for pilot through at least 50 k
+   pcs. Injection-moulding temperatures (220–260°C) destroy NFC chip modules; the correct
+   alternative (lamination at 130–160°C) is functionally identical to Option A. Option B collapses
+   to Option A under the correct process. Consider Option B only for Gen 3 if field data shows
+   delamination failure rates justify a monolithic body.
+
+6. **Grommet RF verification:** a 316L stainless grommet acts as a conductive shorted ring at
+   13.56 MHz (skin depth ~0.12 mm). EE review (2026-11-09) confirmed ≤9 mm OD is safe; above
+   ~12–13 mm OD antenna aperture loss becomes significant. This must be verified empirically at
+   PoC Gate 1: measure read range on a hex PCB with and without the 9 mm grommet in position.
+   The antenna keep-out zone around the grommet hole must be explicit in the inlay drawing.
+
+7. **Tear-away character height specification:** EE and ID reviews identified this is not yet
+   specified. Minimum: 3 mm for NAME and UUID; 2 mm for UNIT and enrollment date; on both faces.
+   Must be in the manufacturing drawing before procurement.
+
+8. **Card size** *(resolved 2026-11-09):* **54 mm across-corners.** The original 48 mm was
+   chosen for US dog tag equivalence (51 × 29 mm, ~1,350 mm²), which is not a requirement
+   in the Swedish deployment context (Försvarsmakten, MSB, blåljus). Nordic tags are larger.
+
+   | | 48 mm AC | **54 mm AC ✓** | 60 mm AC |
+   |---|---|---|---|
+   | Face area | 1,497 mm² | **1,897 mm²** | 2,338 mm² |
+   | 2-turn coil aperture (est.) | ~1,150 mm² | **~1,560 mm²** | ~2,000 mm² |
+   | Grommet vertex margin (9 mm OD) | 1.5 mm | **4.5 mm** | 7.5 mm |
+   | Character rows at 3 mm height | ~6 | **~8** | ~10 |
+
+   54 mm improves all three constraints (RF coupling, engraving area, grommet clearance)
+   meaningfully without the form-factor step of 60 mm. With surround the card is ~59 mm
+   wide — worn under a t-shirt without bulk. Both elements (NFC card and tear-away) use
+   54 mm AC.
+
+   **EE review (2026-11-09):** confirmed. The ~36% aperture gain reduces required minimum
+   field strength at 2 cm by ~27%, extending undetuned range by ~11%. Two turns still
+   correct. One mandatory action before coil order: inductance L increases ~14% with the
+   larger aperture; recalculate the tuning capacitor C to hold resonant frequency at
+   14.5–15 MHz (intentional detuning for range control). Inlay drawing must specify a
+   10 mm OD antenna keep-out circle centred on the grommet bore.
+
+   **ID review (2026-11-09):** confirmed. 8 engraving rows at 3 mm resolves OQ-7 (character
+   height). Grommet structural risk at 1.5 mm vertex margin is gone at 4.5 mm. Surround
+   mould tooling RFQ should be issued now that size is locked. ADR-0056 and manufacturing
+   specs must update the antenna aperture reference from "flat hexagonal 2-turn coil, 48 mm
+   aperture" to "~50–51 mm aperture" to match the 54 mm body.
 
 ## Conflict with accepted ADRs
 

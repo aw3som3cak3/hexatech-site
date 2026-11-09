@@ -106,10 +106,19 @@ authority holds the GP security domain key. No Hexatec-signed identity claims ar
 into the chip's certificate chain. ✓
 
 **P10 (adopt existing standards):**
-JCOP 4 is JavaCard 3.0.5 / GlobalPlatform 2.3.1 / FIPS 140-3 (re-certified March 2025)
-/ CC EAL5+ / ISO 14443-4 / ISO 7816-4. ECDSA P-256 is NIST-standardised. No novel
-cryptography is introduced. P10 is not only met — JCOP 4 covers more
-standard compliance targets (FIPS 140-3, GP 2.3.1) than DUOX did. ✓
+JCOP 4 is JavaCard 3.0.5 / GlobalPlatform 2.3.1 / FIPS 140-3 (certificate #4679,
+initially validated March 2024, for the P71D600 module with NXP applets) / CC EAL5+ /
+ISO 14443-4 / ISO 7816-4. ECDSA P-256 is NIST-standardised. No novel cryptography is
+introduced.
+
+Important certification boundary: FIPS 140-3 certificate #4679 covers the chip module
+and the specific NXP applets loaded at time of validation. It does not automatically
+certify the Hexa applet that will be loaded on top. The applet specification ADR must
+define the assurance boundary and identify what certification the Hexa applet will
+require independently (FIPS certification for the applet itself, or reliance on the
+chip module's boundary with a documented rationale).
+
+P10 is met for the chip platform. ✓
 
 ---
 
