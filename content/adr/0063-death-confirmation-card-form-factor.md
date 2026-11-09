@@ -7,6 +7,8 @@
 - **Consistent with:** ADR-0023 (two-key death confirmation — principle preserved)
 - **Depends on:** ADR-0062 (tag and tear-away data model)
 
+> **Note:** this ADR is accepted for the card + tear-away form factor. Its production deployment is conditional on ADR-0056 passing Gates 1 and 2. Death-confirmation protocol is ready for applet implementation.
+
 ## Context
 
 ADR-0023 establishes a two-key death confirmation protocol designed around the ring form

@@ -10,6 +10,8 @@
   is specific to the ring form factor and does not apply here. The card form factor uses
   the terms **tag** (the JCOP hex card) and **tear-away** (the 316L stainless element).
 
+> **Note:** this ADR is accepted for the card + tear-away form factor. Its production deployment is conditional on ADR-0056 passing Gates 1 and 2. The applet data model and enrollment sequence are ready for prototype implementation.
+
 ## Context
 
 ADR-0056 defines the physical form factor — a JCOP hexagonal card (54 mm across-corners)

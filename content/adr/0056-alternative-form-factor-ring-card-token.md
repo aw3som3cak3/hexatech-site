@@ -111,9 +111,7 @@ opens to accept the chain and is then closed, or (b) a closed-link chain topolog
 is captured during assembly rather than threaded. Consequence: the chain cannot be field-swapped
 without specialised tools. This must be defined in the manufacturing drawing before tooling is ordered.
 
-The assembly has three Tag Locator carriers: card grommet flange (6-char abbreviated locator,
-die-struck), tear-away grommet flange (6-char abbreviated locator, die-struck), tear-away
-engraved face (full 11-char Tag Locator).
+The assembly has three Tag Locator carriers: card grommet flange (6-char abbreviated locator, ≥ 0.3 mm relief; method after DFM check), tear-away grommet flange (6-char abbreviated locator, ≥ 0.3 mm relief; method after DFM check), tear-away engraved face (full 11-char Tag Locator, fiber-laser).
 
 **RF constraint (EE review 2026-11-09):** NXP JCOP 4 operates at 13.56 MHz; a 316L
 grommet acts as a shorted conductive ring with skin depth ~0.12 mm. At ≤9 mm OD the antenna
@@ -142,7 +140,7 @@ to the main neck chain, easily separated by the first responder who encounters t
 - **Chain hole:** at the top (+Y) vertex; fitted with a 316L stainless double-flange grommet
   (9 mm flange OD, 3.5 mm bore, 2.5 mm barrel to match TOKEN_T). The chain passes through
   the steel bore, protecting the hex edge from wear when the tear-away is pulled free.
-  Abbreviated Tag Locator (6 Crockford chars, die-struck to ≥ 0.3 mm relief) is engraved
+  Abbreviated Tag Locator (6 Crockford chars, ≥ 0.3 mm relief; method after DFM check) is engraved
   on the grommet front flange face; full 11-char Tag Locator is engraved on the face.
 - **Short chain connector:** quick-release connector with deliberate separation force 25–50 N;
   resistant to inadvertent separation under 15 N snag or handling load. Connector type must
@@ -153,8 +151,9 @@ to the main neck chain, easily separated by the first responder who encounters t
   the separation doctrine to civilian and humanitarian first responders.
 - **Fire survival:** 316L melts at 1,375–1,400 °C; grommet and full identity fields survive
   structural fire. Fire-survival engraving depth ≥ 0.3 mm for all 316L elements: **grommet
-  flanges die-struck; tear-away face fiber-laser at ≥ 0.3 mm depth.** Both methods produce
-  sufficient physical relief for loupe legibility after 700–900 °C fire exposure. Gate 1
+  flanges ≥ 0.3 mm relief (method after DFM check — die-struck or CNC-engraved); tear-away
+  face fiber-laser at ≥ 0.3 mm depth.** Both methods produce sufficient physical relief for
+  loupe legibility after 700–900 °C fire exposure. Gate 1
   supplementary fire test: expose an engraved 316L sample to 850 °C for 30 minutes in air;
   verify character legibility with 10× loupe after cooling (pass criterion: individual
   characters identifiable).

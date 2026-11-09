@@ -5,7 +5,7 @@
 - **Principles:** P1, P2, P3
 - **Amends:** ADR-0022 (adds explicit validation gates to the hardware risk items noted there), ADR-0041, ADR-0042
 
-**Amendment (2026-11-09):** Gate definitions for the card + tear-away form factor are superseded by ADR-0065. ADR-0052's gate definitions apply to the ring/core form factor only. The card form factor is now the active design.
+**Amendment (2026-11-09):** ADR-0065 defines the parallel gate protocols for the card + tear-away form factor. ADR-0052 governs the ring/core form factor and remains valid. The card + tear-away form factor is selected for prototyping (ADR-0056).
 
 ## Context
 

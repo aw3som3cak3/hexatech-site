@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-11-09
 - **Principles:** P1, P2
-- **Supersedes (gate definitions only):** ADR-0052 (physical design validation plan — ring/core form factor)
+- **Card-form-factor counterpart to:** ADR-0052 (physical design validation plan — ring/core form factor)
 - **Depends on:** ADR-0056 (card + tear-away form factor), ADR-0063 (separation doctrine)
 
 ## Context
@@ -18,9 +18,7 @@ All three reference the ring/core/bayonet/Ti architecture. ADR-0056 eliminates t
 in favour of a PC/PETG NFC hex card + 316L steel tear-away. The existing gate protocols are not
 applicable to the new form factor.
 
-This ADR replaces the gate protocols in ADR-0052. ADR-0052's context, rationale, and principles
-sections remain valid. If the ring/core design is ever revived, ADR-0052's gate text should be
-restored by a new ADR — this document does not invalidate the approach, only the specific tests.
+This ADR defines gate protocols for the card + tear-away form factor. ADR-0052's gate protocols remain valid for the ring/core form factor. ADR-0052's context, rationale, and principles sections remain valid as a reference document.
 
 ---
 
@@ -51,7 +49,7 @@ no-ferrite baseline for inductance measurement only.
 
 1. Resonant frequency, config A (no ferrite, no grommet). Records baseline inductance L and calculates expected tuning capacitor C. No pass/fail target — this is an inductance measurement only.
 2. Resonant frequency, config B (grommet + ferrite installed). **Initial prototype target: 14.5–15 MHz.** Record grommet+ferrite-induced shift from measurement 1. The production tuning target is set from this measurement.
-3. Loaded Q factor at resonance, configs A and B (loaded Q = measured with JCOP chip attached and antenna tuned; not unloaded coil-only Q). **Design target / diagnostic: Q 15–35 at 13.56 MHz (config B — grommet installed, chip attached). This is not a Gate 1 pass/fail criterion.** Q < 15 risks insufficient power margin; Q > 35 narrows bandwidth and attenuates the 847 kHz load-modulation sidebands. Record the measured value for the inlay vendor and use it to refine the tuning capacitor spec; treat transaction completion (measurement 9) and activation range (measurements 4, 6, 8) as the actual reliability criteria. Note: ISO 14443-2 PICC class dependency applies — 1.5 A/m is the H_min for PICC classes 1–3; classes 4–6 have higher minima. Confirm the P71D600's PICC class with NXP before interpreting OQ-9's power budget calculation.
+3. Loaded Q factor at resonance, configs A and B (loaded Q = measured with JCOP chip attached and antenna tuned; not unloaded coil-only Q). **Design target / diagnostic: Q 15–35 at 13.56 MHz (config B — grommet installed, chip attached). This is not a Gate 1 pass/fail criterion.** Q < 15 risks insufficient power margin; Q > 35 narrows bandwidth and attenuates the 847 kHz load-modulation sidebands. Record the measured value for the inlay vendor and use it to refine the tuning capacitor spec; treat transaction completion (measurement 9) and activation range (measurements 4, 6, 8) as the actual reliability criteria. Note: ISO 14443-2 PICC class dependency applies — 1.5 A/m is the H_min for PICC classes 1–3; classes 4–6 have higher minima. PICC class is determined by antenna coil geometry (ISO 14443-1 defines the antenna size zones for each class), not by the chip. Classify the ~50 mm hex coil against the PICC antenna class zones in ISO 14443-1 and use the class-specific H_min from ISO 14443-2 before interpreting OQ-9's power budget calculation.
 4. Read range sweep 0–50 mm, config B. Reader: standard NFC smartphone (conservative minimum). Pass: ISO 14443A activation ≥ 2 cm.
 5. Resonant frequency and Q, config C. Records body-loading shift.
 6. Read range sweep, config C. **Pass criterion: ISO 14443A activation ≥ 2 cm on smartphone.**
@@ -189,5 +187,4 @@ specification and surround bond criteria must be validated before tooling spend.
 **Gate 3 must be completed before first deployment** — usability validation for non-military
 populations is required by the humanitarian and civilian use cases in ADR-0056.
 
-The ring/core gate protocols in ADR-0052 are superseded by this ADR. ADR-0052's acceptance
-criteria, testing rationale, and principle tests remain valid as a reference document.
+ADR-0052's gate protocols govern the ring/core form factor. This ADR governs the card + tear-away form factor. Both gate sets remain valid for their respective form factors.
