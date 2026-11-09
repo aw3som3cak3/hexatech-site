@@ -29,9 +29,9 @@ const SCENE_GROUPS = [
     scenes: [
       { id: 'card-nfc',      label: 'NFC Card' },
       { id: 'card-tearaway', label: 'Tear-away' },
-      { id: 'card-assembly', label: 'Card + Surround' },
-      { id: 'card-full',     label: 'Full Set' },
-      { id: 'card-worn',     label: 'Worn' },
+      { id: 'card-assembly', label: 'Card + Surround', bg: '#1e293b' },
+      { id: 'card-full',     label: 'Full Set',        bg: '#1e293b' },
+      { id: 'card-worn',     label: 'Worn',            bg: '#1e293b' },
       { id: 'card-grommet',  label: 'Grommet' },
     ],
   },
@@ -51,6 +51,9 @@ const RENDERS = [
 export default function ModelPage() {
   const [scene, setScene] = useState('assembly')
   const [missing, setMissing] = useState(false)
+
+  const allScenes = SCENE_GROUPS.flatMap(g => g.scenes)
+  const activeBg = allScenes.find(s => s.id === scene)?.bg ?? '#09090b'
 
   return (
     <div className="flex flex-col" style={{ height: 'calc(100dvh - 48px)' }}>
@@ -121,7 +124,7 @@ export default function ModelPage() {
           shadow-intensity="2"
           shadow-softness="0.8"
           exposure="1.1"
-          style={{ width: '100%', flex: 1, background: '#09090b' }}
+          style={{ width: '100%', flex: 1, background: activeBg }}
           onError={() => setMissing(true)}
         />
       )}
