@@ -11,7 +11,7 @@ import { useState, createElement } from 'react'
 // model-viewer is a custom element — use createElement to avoid JSX type errors
 const ModelViewer = (props: Record<string, unknown>) => createElement('model-viewer', props)
 
-const SCENE_GROUPS = [
+const SCENE_GROUPS: { label: string | null; scenes: { id: string; label: string; bg?: string }[] }[] = [
   {
     label: 'Ring & Core',
     scenes: [
