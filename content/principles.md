@@ -11,6 +11,7 @@ no consent, and a hostile RF environment. Offline access cannot be fully prevent
 so every access must be signed, counted and later logged (pattern from offline CBDC wallets).
 **Test:** Can an authorised medic read Tier 1 with no network? Does every read produce a
 mutually signed, attributable record that reaches the transparency log when either party syncs?
+(Exception: consumer mode takes a P1 attribution exception — chip-signed but reader-anonymous — see ADR-0061 Decision 1a.)
 
 ### P2 — The tag is a cache and an authenticator, never the identity or source of truth
 **Rationale:** Tags get lost, destroyed and stale. The account and its attestations are the

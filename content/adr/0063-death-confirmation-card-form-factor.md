@@ -42,12 +42,16 @@ by physical separation of two chips:
 2. **Person B** (officer, chaplain, or mortuary specialist) connects to the same tag in
    a separate session and countersigns the declaration:
    `countersign_death(signed_payload, person_b_credential)`
-   The applet verifies (a) that Person B's **certificate subject** differs from Person A's,
-   and (b) that Person B holds a certificate scoped to an authorised countersign role
-   (e.g., a DV-level terminal certificate with a role attribute indicating MORTUARY,
-   CHAPLAIN, or COMMANDING_OFFICER). Credential number inequality alone is not sufficient
-   — a single individual may legitimately hold credentials on multiple devices. Status
-   moves to `CONFIRMED`.
+   The applet verifies (a) that Person B's credential encodes a **distinct authority-verified
+   human principal identifier** from Person A's — this requires the PKI issuance policy to
+   bind one unique subject identity per person, not per device or per role; (b) that Person B
+   holds a certificate scoped to an authorised countersign role (e.g., a DV-level terminal
+   certificate with a role attribute of MORTUARY, CHAPLAIN, or COMMANDING_OFFICER); and (c)
+   that the subject identifier is an identity-verified binding to a natural person, not a
+   device or service. Credential number inequality alone is not sufficient — a single
+   individual may legitimately hold credentials on multiple devices. The PKI issuance policy
+   must enforce one-subject-per-person; this requirement must be carried into the deployment
+   authority's CA policy for the DV-level certificates. Status moves to `CONFIRMED`.
 
 3. Only `CONFIRMED` status triggers casualty reporting on sync (unchanged from ADR-0023).
 

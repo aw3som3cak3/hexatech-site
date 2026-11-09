@@ -38,9 +38,12 @@ levels; the applet domains below describe how data is organised inside the JCOP 
 **Session domain** (unauthenticated read)
 - Session token (random, per power cycle — ADR-0060 Decision 3)
 - Deployment mode flag (consumer / sovereign — ADR-0061 Decision 3)
-- JCOP hardware key pair and chip certificate (chip identity, not exposed as person UUID)
-- Access: returned to any reader with no authentication; this is the only data returned
-  before terminal authentication or owner verification
+- JCOP chip certificate (public key only; chip identity, not exposed as person UUID).
+  **Private key material is never returned to any reader.**
+- Access: returned to any reader with no authentication.
+  - In **sovereign mode**: this is the only data returned before terminal authentication.
+  - In **consumer mode**: the Emergency domain (Tier 1) is also returned without authentication
+    per ADR-0061 Decision 1.
 
 **Emergency domain** (Tier 1 — ADR-0001)
 - Signed HL7 FHIR IPS emergency profile (ADR-0016)
@@ -49,12 +52,15 @@ levels; the applet domains below describe how data is organised inside the JCOP 
 - Owner verification never required for read (P9 / break-glass)
 
 **Identity domain** (Tier 2 — ADR-0001)
-- Enrollment ID (ADR-0060 Decision 1) — accessible to authenticated terminals
+- **Pairwise RP ID** (ADR-0060 Decision 2) — returned to authenticated terminals
   **without** owner verification; required for emergency identification of an unconscious
-  person (a hospital must be able to look up the patient record from the chip without
-  the patient's PIN or biometric)
-- Pairwise RP ID derivation material — accessible to authenticated terminals without
-  owner verification
+  person (a hospital receives the pairwise RP ID to look up the patient record without
+  the patient's PIN or biometric). The pairwise RP ID is tenant-scoped so different RPs
+  cannot correlate reads.
+- **Enrollment ID** (ADR-0060 Decision 1) — stored on chip and in account record;
+  **NOT released to external terminals or relying parties**. The enrollment ID is used
+  internally by the chip and the enrollment broker only (pairwise ID derivation, applet
+  state machine). ADR-0060 Decision 1 is explicit: "Never released to relying parties."
 - Identity attestations (national ID pointers, mdoc / SD-JWT VC — ADR-0013) —
   owner verification required
 - Signing operations — owner verification required
@@ -71,7 +77,7 @@ levels; the applet domains below describe how data is organised inside the JCOP 
 
 The 316L stainless tear-away is:
 - A fire-survivable physical identification element (ADR-0049 / ADR-0054)
-- Engraved with the **Tag Locator** (the 8-character short-ID from ADR-0060 Decision 4)
+- Engraved with the **Tag Locator** (the 11-character short-ID from ADR-0060 Decision 4)
 - **No chip. No antenna. No electronic storage.**
 
 The tear-away's identification function is entirely physical: a first responder who finds
@@ -151,7 +157,10 @@ preserved. ✓
 - The single JCOP tag holds all tiers including the casualty log. Chip memory budget
   must accommodate the full set. JCOP 4 (NXP P71D600) has 80 KB EEPROM; a Tier 1
   FHIR IPS profile is typically 2–5 KB; a 100-entry casualty log at ~200 bytes/entry
-  is 20 KB. This is within budget but must be validated in the applet specification ADR.
+  is 20 KB. This is nominally within budget but must be validated against the actual
+  available user EEPROM on the P71D600 after FIDO2 and other pre-loaded NXP applets
+  are installed — the 80 KB figure is the nominal total; the available user partition
+  may be smaller. Confirm against the P71D600 datasheet before the applet spec is written.
 - The tear-away carries no electronic verification. A found tear-away cannot be
   cryptographically proven to belong to a specific person — only the engraving links it.
   This is acceptable: the tear-away is a physical reporting token, not a primary

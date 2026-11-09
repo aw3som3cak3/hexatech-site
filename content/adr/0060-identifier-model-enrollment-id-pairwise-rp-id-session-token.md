@@ -103,7 +103,15 @@ Properties:
 **Collision detection at enrollment:**
 The enrollment system must check each generated Tag Locator against existing locators
 in the deployment's registry before personalisation. On collision (expected at ~1 M+ scale),
-re-derive with a different namespace salt or assign a new random Enrollment ID.
+assign a new random Enrollment ID and re-derive. Do NOT re-derive the locator with a different
+salt while keeping the same Enrollment ID — a person's locator must be reproducible from
+their Enrollment ID alone; having multiple salts in the registry breaks this invariant.
+
+**Storing the issued locator:**
+The enrollment system must store the issued Tag Locator in the account record alongside the
+Enrollment ID. The derivation formula is used at issuance only; subsequent lookups and
+reissuances reference the stored locator. This ensures the locator is reproducible without
+requiring the derivation formula to be re-run outside the enrollment system.
 
 **Explicit acceptance of OQ-23's privacy trade-off:**
 

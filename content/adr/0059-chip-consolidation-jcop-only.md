@@ -62,7 +62,8 @@ engineering deliverable before pilot launch. A JCOP applet specification ADR mus
 written before development begins. That ADR must specify:
 
 - Enrollment APDU sequence (UUID write, tier ACL, key provisioning)
-- Tier 1 medical read (unauthenticated — per ADR-0057 Decision 1 as amended)
+- Tier 1 medical read (unauthenticated in consumer mode per ADR-0061 Decision 1;
+    terminal-cert gated in sovereign mode per ADR-0057/ADR-0061)
 - Tier 2 authenticated read (ECC challenge-response, ECDSA-signed session record)
 - Casualty-log append command (chip signs hash of payload — the P1 record)
 - Key management lifecycle (re-enrollment, revocation)

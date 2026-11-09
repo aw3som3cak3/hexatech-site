@@ -158,7 +158,8 @@ Tier 2 and above: owner verification always required — correct. ✓
 ## Consequences
 
 **What becomes possible:**
-- Consumer break-glass works: a bystander with any NFC-capable phone can read Tier 1.
+- Consumer break-glass works: a bystander using the Hexa app can read Tier 1; bystanders
+  without the app require the NDEF fallback path (see OQ-32).
 - ADR-0019 is fully implementable in the JCOP applet.
 - The P9 contradiction inside ADR-0057 is resolved.
 
@@ -166,8 +167,10 @@ Tier 2 and above: owner verification always required — correct. ✓
 - The JCOP applet must implement two distinct access paths controlled by a mode flag.
   This adds applet complexity.
 - Consumer-mode Tier 1 reads are unauthenticated but signed. The transparency log entry
-  is created when either the chip or a syncing reader submits it. Offline consumer reads
-  may never reach the log if the reader never syncs — this residual is accepted and noted.
+  is created when a syncing reader or the Hexa app submits it after a consumer-mode read.
+  The chip has no network capability and cannot submit log entries directly. Offline
+  consumer reads may never reach the log if the reading device does not have the Hexa app
+  or never syncs — this residual is accepted and noted in OQ-30.
 
 **What we give up:**
 - The simplicity of a single access model for all modes. The applet now has a branch.

@@ -48,12 +48,15 @@ This is a deployment configuration, not the default. It must be documented as a 
 exception in the deployment authority's data protection decision. The applet must implement
 this as a configurable permission, not a hardwired behaviour.
 
-**Decision 1b — Emergency indicator flag (optional, owner-controlled):**
-In consumer mode, the owner may configure a single coded flag (`EMERGENCY_INFO_AVAILABLE`,
+**Decision 1b — Emergency indicator flag (optional, owner-controlled, sovereign mode only):**
+In **sovereign mode**, the owner may configure a single coded flag (`EMERGENCY_INFO_AVAILABLE`,
 boolean) readable unauthenticated. This flag does not contain personal data; it signals that
 authenticated readers may request emergency information. This is consistent with ADR-0005
 (attributable reads) because the read is unauthenticated and produces no audit event — only
 authenticated reads do.
+Note: in consumer mode this flag is redundant — Tier 1 is returned unauthenticated anyway
+per ADR-0061 Decision 1. The flag is only meaningful in sovereign mode, where unauthenticated
+readers would otherwise receive only the session token.
 
 **Conflict with ADR-0056 public partition:**
 The public partition as specified in ADR-0056 (surname + UUID + red-flag line to any reader)
