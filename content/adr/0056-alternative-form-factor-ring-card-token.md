@@ -50,7 +50,7 @@ one goes with the reporting chain. Personnel worldwide know the doctrine without
   and hot-press laminated into the PC/PETG body; ~50–51 mm AC effective aperture; tuning
   capacitor (NPO/C0G, ±1% tolerance) targeting resonant frequency 14.5–15 MHz free air with
   ferrite sheet installed — initial prototype target, confirmed by Gate 1 measurement
-  (ADR-0065); minimum Q ≥ 20 at 13.56 MHz (free air, grommet installed); minimum conductor:
+  (ADR-0065); loaded Q 15–35 at 13.56 MHz (chip attached, grommet installed; not unloaded coil-only Q); minimum conductor:
   35 μm Cu, 0.3 mm trace width; 10 mm OD keep-out zone around grommet bore
 - **Ferrite sheet:** NiZn sintered ferrite sheet (μᵣ ≥ 100 at 13.56 MHz, 0.3–0.5 mm thick;
   e.g. TDK IFL06, Laird BMF-30, or Würth 348005) bonded to card back face, die-cut to
@@ -101,9 +101,7 @@ explicit in the enrollment system specification.
 The full 11-char Tag Locator is engraved on the tear-away face (bare-eye field read).
 Minimum character height on the grommet flange: ≥ 1.5 mm at mid-ring radius (confirm
 in CAD before die specification is issued).
-**Grommet engraving sequence:** the grommet is engraved pre-assembly on a rotary fixture,
-then individually matched to its designated card assembly and recorded in the enrollment
-transaction. Enrolled grommets must be tracked through assembly — no generic pre-engraving.
+**Grommet engraving method:** die-struck to ≥ 0.3 mm physical relief depth on a rotary fixture (CNC mill or die press). **DFM check required before die specification:** stamping 0.3 mm relief into a 0.8 mm flange may distort the flange geometry or bore tolerance; have the machinist confirm feasibility and inspect bore concentricity after a pilot run. The grommet is engraved pre-assembly, individually matched to its designated card assembly, and recorded in the enrollment transaction. Enrolled grommets must be tracked through assembly — no generic pre-engraving.
 
 **Card grommet:** barrel height = 3.5 mm (CARD_T). **Tear-away grommet:** barrel height =
 2.5 mm (TOKEN_T). Both have 0.8 mm flanges on each face. Chain bore through both elements
@@ -160,10 +158,12 @@ to the main neck chain, easily separated by the first responder who encounters t
   engraved on a reserved area of the tear-away face, character height ≥ 2 mm; communicates
   the separation doctrine to civilian and humanitarian first responders.
 - **Fire survival:** 316L melts at 1,375–1,400 °C; grommet and full identity fields survive
-  structural fire. Fire-survival engraving depth ≥ 0.3 mm (die-struck) for all 316L elements
-  to ensure legibility after oxidation and soot at 700–900 °C. Gate 1 supplementary fire
-  test: expose an engraved 316L sample to 850 °C for 30 minutes in air; verify character
-  legibility with 10× loupe after cooling (pass criterion: individual characters identifiable).
+  structural fire. Fire-survival engraving depth ≥ 0.3 mm for all 316L elements: **grommet
+  flanges die-struck; tear-away face fiber-laser at ≥ 0.3 mm depth.** Both methods produce
+  sufficient physical relief for loupe legibility after 700–900 °C fire exposure. Gate 1
+  supplementary fire test: expose an engraved 316L sample to 850 °C for 30 minutes in air;
+  verify character legibility with 10× loupe after cooling (pass criterion: individual
+  characters identifiable).
 
 **RF stacking mitigation (EE review 2026-11-09, OQ-33 decision):** A solid 316L disc
 (54 mm × 2.5 mm) is ~21 skin depths thick at 13.56 MHz (δ ≈ 0.12 mm) and suppresses NFC
@@ -226,7 +226,7 @@ tear-away is enrolled in the same controlled transaction but is a physically sep
 **Enrollment sequence (not a single atomic write — a controlled transaction with readback verification):**
 
 1. Allocate Enrollment ID in the enrollment system registry.
-2. Engrave physical carriers (grommet flanges die-struck, tear-away face fiber-laser ≥ 0.3 mm depth, card face printed) — this is the step where Tag Locator is committed to 316L; grommets must already be matched to their designated assemblies from the pre-assembly engraving step.
+2. Engrave remaining physical carriers (tear-away face fiber-laser ≥ 0.3 mm depth; card face printed). Note: grommet flanges were die-struck pre-assembly and are already matched to their designated assemblies at this point — the grommet is not engraved at this step, only assembled.
 3. Assemble: press-fit grommet into card; bond silicone surround.
 4. Personalise the JCOP chip: write Enrollment ID, configure partitions, provision keys.
 5. Readback verification: scan card; verify Tag Locator on chip matches grommet engraving and matches enrollment registry entry.
@@ -333,10 +333,7 @@ military ID.
    is the more useful routing field for the first deployment context (Försvarsmakten vs.
    humanitarian) should be resolved by OQ-1 (first customer).
 
-3. **Grommet Tag Locator consistency:** the Tag Locator engraved on the grommet and on the card
-   face must be generated from the same enrollment event and must be derived from the Enrollment ID
-   per ADR-0060 Decision 4. The enrollment system must write all four carriers in a single
-   transaction. Procedure not yet defined.
+3. ~~**Grommet Tag Locator consistency**~~ — resolved in the Sealed Manufacturing Unit section of this ADR: the enrollment sequence (6-step controlled transaction with readback verification) defines the procedure. All carriers are matched in one controlled transaction; a mismatch at step 5 voids the full set.
 
 4. **Silicone surround tooling timing:** the injection mould lead time is 6–10 weeks.
    For the Phase A PoC, a 3D-printed or off-the-shelf silicone gasket should be identified
@@ -387,16 +384,22 @@ military ID.
    Gate 1 measurement with ferrite sheet installed (ADR-0065). Inlay drawing must specify
    a 10 mm OD antenna keep-out circle centred on the grommet bore.
 
-9. **NFC power budget:** EE review (2026-11-09) identified V_oc ≈ 0.5 V at H_min = 1.5 A/m
-   (SmartMX3 family proxy; **verify P71D600-specific H_min from NXP product brief before inlay
-   drawing is finalized — this is the one remaining open action before this OQ closes**). The
-   derating calculation is documented here:
+   **ID review (2026-11-09):** confirmed. 8 engraving rows at 3 mm resolves OQ-7 (character
+   height). Grommet structural risk at 1.5 mm vertex margin is gone at 4.5 mm. Surround
+   mould tooling RFQ should be issued now that size is locked. ADR-0056 and manufacturing
+   specs must update the antenna aperture reference from "flat hexagonal 2-turn coil, 48 mm
+   aperture" to "~50–51 mm aperture" to match the 54 mm body.
 
-   **H_min reference:** field-strength requirements for PICCs are in ISO/IEC 14443-2 (RF power and
-   signal interface), not Part 1. The applicable H_min depends on PICC class; a compliant PICC must
-   operate in a field of 1.5 A/m (ISO 14443-2 minimum). The P71D600 is ISO 14443-4 certified, so
-   H_min ≤ 1.5 A/m is a standard obligation. Using 1.5 A/m is a conservative worst case — real
-   chip sensitivity is typically 0.5–1.0 A/m, which widens the margin.
+9. **NFC power budget:** EE review (2026-11-09) identified V_oc ≈ 0.5 V at H_min = 1.5 A/m
+   (ISO 14443-2 standard obligation for ISO 14443-4 certified chips; see H_min reference below).
+   The derating calculation is documented here:
+
+   **H_min reference (closed on ISO 14443-2):** field-strength requirements for PICCs are in
+   ISO/IEC 14443-2 (RF power and signal interface). A compliant PICC must operate at H_min ≤ 1.5 A/m
+   (ISO 14443-2 minimum); the P71D600 is ISO 14443-4 certified, so this is a standard obligation.
+   Using 1.5 A/m as a conservative worst case is closed on this basis. ADR-0065 measurement 11
+   (calibrated field generator) is optional — if equipment is available it provides useful data,
+   but it is not a Gate 1 pass criterion.
 
    At resonance with matched load, chip terminal voltage ≈ Q × V_oc / 2.
    - Free air (Q = 20): V_chip ≈ 20 × 0.5 / 2 = **5.0 V** — well above chip minimum.
@@ -412,12 +415,6 @@ military ID.
    consumption in the assembled device. **Power budget status: provisionally estimated, pending
    Gate 1 confirmation.** The derating calculation establishes the design is not implausible; Gate 1
    measurement 3 (loaded Q) and measurement 8 (full config D read range) provide the empirical closure.
-
-   **ID review (2026-11-09):** confirmed. 8 engraving rows at 3 mm resolves OQ-7 (character
-   height). Grommet structural risk at 1.5 mm vertex margin is gone at 4.5 mm. Surround
-   mould tooling RFQ should be issued now that size is locked. ADR-0056 and manufacturing
-   specs must update the antenna aperture reference from "flat hexagonal 2-turn coil, 48 mm
-   aperture" to "~50–51 mm aperture" to match the 54 mm body.
 
 ## Conflict with accepted ADRs
 

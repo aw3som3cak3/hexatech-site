@@ -107,6 +107,8 @@ assign a new random Enrollment ID and re-derive. Do NOT re-derive the locator wi
 salt while keeping the same Enrollment ID — a person's locator must be reproducible from
 their Enrollment ID alone; having multiple salts in the registry breaks this invariant.
 
+**Grommet prefix uniqueness:** the 316L grommet carries only the first 6 Crockford characters of the Tag Locator (ADR-0056). These 6 characters span ~30 bits and have a ~4.5% birthday collision probability at 10,000 issued tags — the prefix is not guaranteed unique by space alone. The enrollment system must either: (a) **enforce prefix uniqueness** — additionally check that no existing issued tag shares the same 6-character prefix, and re-roll the Enrollment ID until a unique prefix is obtained; or (b) **accept ambiguous forensic lookup** — explicitly document that grommet recovery may require disambiguation by SURNAME, UNIT, or deployment context when two tags share a prefix. The deployment configuration must state which policy applies. For sovereign deployments ≥ 10,000 enrolled individuals, option (a) is recommended.
+
 **Storing the issued locator:**
 The enrollment system must store the issued Tag Locator in the account record alongside the
 Enrollment ID. The derivation formula is used at issuance only; subsequent lookups and
