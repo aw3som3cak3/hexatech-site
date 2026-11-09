@@ -404,8 +404,10 @@ military ID.
      Q_min ≈ 20 × 0.75 × 0.90 = 13.5. V_chip ≈ 13.5 × 0.5 / 2 = **3.4 V** — positive margin.
    - Ferrite sheet increases effective L by ~5–10%, raising V_oc to ~0.52–0.55 V: margin widens slightly.
 
-   Conclusion: **Q ≥ 20 free air is the critical margin parameter.** Q ≥ 20 is a hard Gate 1 pass
-   criterion (ADR-0065 measurement 3). The V_chip calculation above is a sanity estimate, not a
+   Conclusion: **loaded Q 15–35 (chip attached) is the critical Gate 1 margin parameter.** Q < 15
+   risks insufficient chip voltage; Q > 35 attenuates the 847 kHz load-modulation sidebands.
+   Loaded Q 15–35 (config B, grommet installed) is a hard Gate 1 pass criterion (ADR-0065 measurement 3).
+   The V_chip calculation above is a sanity estimate, not a
    closed budget — actual performance depends on coupling, loading, resonance, and chip power
    consumption in the assembled device. **Power budget status: provisionally estimated, pending
    Gate 1 confirmation.** The derating calculation establishes the design is not implausible; Gate 1
