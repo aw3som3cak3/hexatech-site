@@ -9,7 +9,7 @@
   ADR-0041/0051/0055 (Ti Gr5 ring — ring eliminated),
   ADR-0048 (Ti shell + PEEK inner carrier), ADR-0049/0054 (UUID cylinder + break-off plate)
 - **Preserves (unchanged if accepted):** ADR-0003 (secure element), ADR-0016 (IPS profile),
-  ADR-0052 (validation gates — test criteria updated), all digital-layer ADRs 0001–0039
+  ADR-0052 (validation gates — gate definitions superseded by ADR-0065), all digital-layer ADRs 0001–0039
 - **Death confirmation:** two-key principle from ADR-0023 preserved via JCOP applet state
   machine — see ADR-0063
 
@@ -46,14 +46,24 @@ one goes with the reporting chain. Personnel worldwide know the doctrine without
   chip has two logical partitions:
   - **Public partition** (unauthenticated read): random session identifier only in sovereign mode (ADR-0057 Decision 1); in consumer mode Tier 1 emergency profile also returned unauthenticated (ADR-0061 Decision 1). Original: SURNAME, UUID, red-flag line — not adopted; conflicts with ADR-0024.
   - **Protected partition** (authenticated read): full Tier 1 medical profile per ADR-0016 in sovereign mode; Tier 2 and above in both modes
-- **Antenna:** flat hexagonal 2-turn coil wound inside the laminate body; ~50–51 mm AC
-  effective aperture; tuning capacitor specified to hold resonant frequency at 14.5–15 MHz
-  (intentional detuning to compensate for body proximity and reader loading pulling resonance down); provides read range ≥ 2 cm (ADR-0052
-  Gate 1 criterion); 10 mm OD keep-out zone around grommet bore
+- **Antenna:** flat hexagonal 2-turn etched foil antenna, produced on PET inlay substrate
+  and hot-press laminated into the PC/PETG body; ~50–51 mm AC effective aperture; tuning
+  capacitor (NPO/C0G, ±1% tolerance) targeting resonant frequency 14.5–15 MHz free air with
+  ferrite sheet installed — initial prototype target, confirmed by Gate 1 measurement
+  (ADR-0065); minimum Q ≥ 20 at 13.56 MHz (free air, grommet installed); minimum conductor:
+  35 μm Cu, 0.3 mm trace width; 10 mm OD keep-out zone around grommet bore
+- **Ferrite sheet:** NiZn sintered ferrite sheet (μᵣ ≥ 100 at 13.56 MHz, 0.3–0.5 mm thick;
+  e.g. TDK IFL06, Laird BMF-30, or Würth 348005) bonded to card back face, die-cut to
+  hexagonal profile with a 10 mm OD aperture centred on the grommet bore; required mitigation
+  for 316L tear-away field attenuation in stacked wear configuration (OQ-33 design decision;
+  physical validation at Gate 1)
 - **Face engraving:** SURNAME / GIVEN NAME / Tag Locator (11-char) / UNIT — laser marked or
   hot-embossed; not fire-survivable but provides quick visual read without scanning
 - **Surround:** silicone hex edge gasket (modified dog-tag silencer form), ~1.8 mm wall,
-  partial face flange — edge protection, skin comfort, mild weather seal
+  partial face flange; Shore A 40–55 durometer; minimum pull-off force 20 N radial peel from
+  card edge; bonded by 0.6–0.8 mm peripheral channel in card laminate edge; resistant to IPA
+  wipe (70% isopropanol) without bond degradation; NFC wave icon moulded or laser-marked on
+  the card face to identify the chip element to civilian and humanitarian users
 - **Chain hole:** at the top (+Y) vertex; fitted with a 316L stainless flange grommet
 
 #### 316L stainless flange grommet (Tag Locator carrier — fire-survival layer)
@@ -71,17 +81,38 @@ The grommet is pressed into the card's chain hole and serves two independent fun
    separate element.
 
 Grommet specification: 316L stainless, double-flange, 9 mm flange OD, 3.5 mm bore.
-Tag Locator laser-engraved on front flange face. Grommet centered at approximately 10.4 mm
-from the vertex along the bisector, giving a ~4.5 mm flange-to-boundary clearance
-(10.4 × sin 60° − 4.5 ≈ 4.5 mm; chain-hole vertex = +Y vertex, pointy-top hex orientation).
-**⚠ Engraving space note:** 9 mm OD with 3.5 mm bore leaves only 2.75 mm of radial ring width
-for engraving on the flange face. Confirm font size and 11-char Tag Locator fit in CAD before
-finalising the grommet drawing.
+Grommet centered at approximately 10.4 mm from the vertex along the bisector, giving a
+~4.5 mm flange-to-boundary clearance (10.4 × sin 60° − 4.5 ≈ 4.5 mm; chain-hole vertex
+= +Y vertex, pointy-top hex orientation).
+
+**Grommet engraving — abbreviated locator (fire-survival identifier):** the 9 mm OD /
+3.5 mm bore leaves only 2.75 mm of radial ring width — insufficient for the full 11-char
+Tag Locator at a bare-eye-readable character height. The grommet carries the **first
+6 Crockford characters of the Tag Locator**, die-struck to ≥ 0.3 mm physical relief depth.
+Readable with a 10× loupe under raking light after fire exposure. Treat as forensic fallback
+for laboratory identification; bare-eye field identification relies on the tear-away face.
+A 6-char prefix spans ~30 bits (Crockford base32); at deployments of up to ~10 K enrolled
+individuals, this prefix is sufficient for direct registry lookup; at larger deployments,
+disambiguation by SURNAME, UNIT, or location context narrows the candidate set.
+The full 11-char Tag Locator is engraved on the tear-away face (bare-eye field read).
+Minimum character height on the grommet flange: ≥ 1.5 mm at mid-ring radius (confirm
+in CAD before die specification is issued).
+**Grommet engraving sequence:** the grommet is engraved pre-assembly on a rotary fixture,
+then individually matched to its designated card assembly and recorded in the enrollment
+transaction. Enrolled grommets must be tracked through assembly — no generic pre-engraving.
 
 **Card grommet:** barrel height = 3.5 mm (CARD_T). **Tear-away grommet:** barrel height =
 2.5 mm (TOKEN_T). Both have 0.8 mm flanges on each face. Chain bore through both elements
-is 3.5 mm diameter. The assembly has three independent Tag Locator engravings: card grommet flange,
-tear-away grommet flange, tear-away engraved face.
+is 3.5 mm diameter.
+
+**Chain ball/link diameter:** chain ball or link diameter on the grommet's chain segment must
+exceed the 3.5 mm bore — minimum ball diameter 4.0 mm — so the grommet cannot slide off
+the chain when the plastic card body burns away. Chain assembly method (end-threading or
+split-bore grommet) must be defined in the manufacturing drawing before tooling is ordered.
+
+The assembly has three Tag Locator carriers: card grommet flange (6-char abbreviated locator,
+die-struck), tear-away grommet flange (6-char abbreviated locator, die-struck), tear-away
+engraved face (full 11-char Tag Locator).
 
 **RF constraint (EE review 2026-11-09):** NXP JCOP 4 operates at 13.56 MHz; a 316L
 grommet acts as a shorted conductive ring with skin depth ~0.12 mm. At ≤9 mm OD the antenna
@@ -110,20 +141,29 @@ to the main neck chain, easily separated by the first responder who encounters t
 - **Chain hole:** at the top (+Y) vertex; fitted with a 316L stainless double-flange grommet
   (9 mm flange OD, 3.5 mm bore, 2.5 mm barrel to match TOKEN_T). The chain passes through
   the steel bore, protecting the hex edge from wear when the tear-away is pulled free.
-  Tag Locator is engraved on the grommet front flange face — matching the card grommet and
-  the engraved face, giving three independent Tag Locator engravings on a single body.
-- **Fire survival:** 316L melts at 1,375–1,400 °C; grommet and full identity fields survive structural fire
+  Abbreviated Tag Locator (6 Crockford chars, die-struck to ≥ 0.3 mm relief) is engraved
+  on the grommet front flange face; full 11-char Tag Locator is engraved on the face.
+- **Short chain connector:** quick-release connector with deliberate separation force 25–50 N;
+  resistant to inadvertent separation under 15 N snag or handling load. Connector type must
+  be specified in the manufacturing drawing before procurement. Gate 2 (ADR-0065) includes
+  an inadvertent-separation test.
+- **Separation marking:** "KIA ONLY" (or bilingual equivalent for the target deployment)
+  engraved on a reserved area of the tear-away face, character height ≥ 2 mm; communicates
+  the separation doctrine to civilian and humanitarian first responders.
+- **Fire survival:** 316L melts at 1,375–1,400 °C; grommet and full identity fields survive
+  structural fire. Fire-survival engraving depth ≥ 0.3 mm (die-struck) for all 316L elements
+  to ensure legibility after oxidation and soot at 700–900 °C. Gate 1 supplementary fire
+  test: expose an engraved 316L sample to 850 °C for 30 minutes in air; verify character
+  legibility with 10× loupe after cooling (pass criterion: individual characters identifiable).
 
-**⚠ RF stacking risk (review 2026-11-09):** A solid 316L disc (54 mm × 2.5 mm) forms a large
-conducting plane at 13.56 MHz. When tag and tear-away are worn stacked together on the neck chain,
-the steel disc attenuates the NFC magnetic field via eddy currents — an effect significantly larger
-than the 9 mm grommet alone. Reads may fail in the stacked configuration. This is distinct from the
-grommet RF question (OQ-29). Mitigation options: (a) ferrite sheet between the elements, or (b) an
-orientation doctrine requiring the reader to present to the card face with the tear-away oriented
-away. Option (c) "unclip tear-away for the read" is excluded: the tear-away doctrine (ADR-0063 1b)
-limits separation to confirmed KIA; a wounded person cannot unclip their own tear-away, and a
-responder should not unclip it. Physical prototype testing at Gate 1 must include the stacked
-configuration. See OQ-33.
+**RF stacking mitigation (EE review 2026-11-09, OQ-33 decision):** A solid 316L disc
+(54 mm × 2.5 mm) is ~21 skin depths thick at 13.56 MHz (δ ≈ 0.12 mm) and suppresses NFC
+field coupling by 70–95% in the stacked configuration — reads will fail without mitigation.
+Orientation doctrine is not viable: both elements hang from the same chain point and rotate
+freely; no mechanism maintains tear-away orientation relative to the card face. "Unclip
+tear-away first" is excluded (ADR-0063 Decision 1b). **Required mitigation: ferrite sheet**
+bonded to the card back face (specified under Element 1 Antenna above). Gate 1 stacked-with-ferrite
+configuration is a hard pass criterion (ADR-0065 Gate 1 measurement 8).
 
 ### Why no NFC on the tear-away
 
@@ -205,7 +245,7 @@ specialist; steel tear-away from precision machining shop.
 |---|---|---|---|
 | Hex laminate body (PC/PETG, die-cut) | $4–8 | $2–5 | $1–2.50 |
 | JCOP secure element | $5–10 | $3–7 | $2–4 |
-| Hex antenna coil (wound, bonded in laminate) | $3–5 | $2–4 | $1–2 |
+| Hex antenna coil (etched foil inlay, laminated) | $3–5 | $2–4 | $1–2 |
 | Card face engraving / hot-emboss | $1–2 | $0.80–1.50 | $0.50–1 |
 | Silicone hex surround (injection mould + part) | $1–2 | $0.50–1 | $0.20–0.50 |
 | 316L grommet (turned, Tag Locator engraved) | $3–5 | $2–4 | $1–2 |
@@ -296,11 +336,6 @@ military ID.
    specified. Minimum: 3 mm for NAME and Tag Locator; 2 mm for UNIT and enrollment date; on both faces.
    Must be in the manufacturing drawing before procurement.
 
-9. **Steel tear-away NFC field shielding:** the 316L tear-away (54 mm × 2.5 mm) is a large
-   conducting disc that may attenuate the NFC field when stacked with the tag on the neck
-   chain. See OQ-33 for options (note: "unclip tear-away first" excluded per ADR-0063 1b KIA
-   doctrine). Gate 1 test must include the stacked configuration.
-
 8. **Card size** *(resolved 2026-11-09):* **54 mm across-corners.** The original 48 mm was
    chosen for US dog tag equivalence (51 × 29 mm, ~1,350 mm²), which is not a requirement
    in the Swedish deployment context (Försvarsmakten, MSB, blåljus). Nordic tags are larger.
@@ -319,10 +354,29 @@ military ID.
 
    **EE review (2026-11-09):** confirmed. The ~36% aperture gain reduces required minimum
    field strength at 2 cm by ~27%, extending undetuned range by ~11%. Two turns still
-   correct. One mandatory action before coil order: inductance L increases ~14% with the
-   larger aperture; recalculate the tuning capacitor C to hold resonant frequency at
-   14.5–15 MHz (intentional detuning to compensate for body proximity and reader loading pulling resonance down). Inlay drawing must specify a
-   10 mm OD antenna keep-out circle centred on the grommet bore.
+   correct. Inductance L increases ~14% with the larger aperture; expected L ≈ 1.5–2.5 μH
+   (design intent, to be confirmed by measurement). Expected tuning capacitor for 14.75 MHz
+   resonance at L = 2 μH: C ≈ 58 pF (NPO/C0G, ±1%). Final tuning target confirmed after
+   Gate 1 measurement with ferrite sheet installed (ADR-0065). Inlay drawing must specify
+   a 10 mm OD antenna keep-out circle centred on the grommet bore.
+
+9. **NFC power budget:** EE review (2026-11-09) identified V_oc ≈ 0.5 V at H_min = 1.5 A/m
+   (SmartMX3 family proxy; **verify P71D600-specific H_min from NXP product brief before inlay
+   drawing is finalized — this is the one remaining open action before this OQ closes**). The
+   derating calculation is documented here:
+
+   At resonance with matched load, chip terminal voltage ≈ Q × V_oc / 2.
+   - Free air (Q = 20): V_chip ≈ 20 × 0.5 / 2 = **5.0 V** — well above chip minimum.
+   - Worst-case derated (body loading 25% Q reduction × grommet 10% Q reduction):
+     Q_min ≈ 20 × 0.75 × 0.90 = 13.5. V_chip ≈ 13.5 × 0.5 / 2 = **3.4 V** — positive margin.
+   - Ferrite sheet increases effective L by ~5–10%, raising V_oc to ~0.52–0.55 V: margin widens slightly.
+
+   Conclusion: **Q ≥ 20 free air is the critical margin parameter.** If Q falls below 20,
+   the derated V_chip may approach the chip's minimum. Q ≥ 20 is therefore a hard Gate 1 pass
+   criterion (ADR-0065 measurement 3). The budget is positive provided Q ≥ 20 is confirmed at Gate 1.
+
+   **Remaining action:** obtain P71D600 H_min from NXP datasheet; if H_min > 1.5 A/m, re-run
+   the calculation above. Record the confirmed figure in this OQ before the inlay drawing is issued.
 
    **ID review (2026-11-09):** confirmed. 8 engraving rows at 3 mm resolves OQ-7 (character
    height). Grommet structural risk at 1.5 mm vertex margin is gone at 4.5 mm. Surround
@@ -339,10 +393,13 @@ status changes to Accepted.
 
 ## Principle tests
 
-**P1 (break-glass offline):** 316L grommet survives structural fire with Tag Locator readable —
-physical identification after electronics loss is preserved. Consumer Tier 1 access via
-ADR-0061 (unauthenticated in consumer mode); authenticated read in sovereign mode.
-P1 attribution exception for consumer mode — see ADR-0061 Decision 1a. ⚠ (consumer); ✓ (sovereign)
+**P1 (break-glass offline):** 316L tear-away survives structural fire with full 11-char Tag
+Locator readable bare-eye — physical identification after electronics loss is preserved.
+316L grommet carries a 6-char abbreviated locator (die-struck, ≥ 0.3 mm relief) for forensic
+identification when the tear-away is absent; loupe required, not bare-eye field read.
+Consumer Tier 1 access via ADR-0061 (unauthenticated in consumer mode); authenticated read
+in sovereign mode. P1 attribution exception for consumer mode — see ADR-0061 Decision 1a.
+⚠ (consumer); ✓ (sovereign)
 
 **P2 (tag is a cache):** Separation doctrine preserved — one element stays, one goes.
 Single JCOP card eliminates the synchronization failure mode of two data-carrying chips.
