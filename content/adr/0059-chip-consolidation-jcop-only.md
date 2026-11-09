@@ -119,6 +119,18 @@ define the assurance boundary and identify what certification the Hexa applet wi
 require independently (FIPS certification for the applet itself, or reliance on the
 chip module's boundary with a documented rationale).
 
+**Certificate sunset:** #4679 expires 2029-03-10 — close to the target production window.
+Note in OQ-4 (certification budget and timeline) and plan the renewal or successor
+certificate engagement before pilot contracts are signed.
+
+**Proven certification path:** third parties have already obtained FIPS 140-3 certificates
+for their own applets on the same P71D600 chip: HID Applets v4.0 (certificate #5390, Level 2,
+active until 2031), OpenFIPS201 v2.0 PIV Applet (certificate #5280), and ST Engineering SSID
+Applet (certificate #5360). This demonstrates a viable certification path for a Hexa applet
+and confirms the chip's assurance boundary can be extended by a third-party applet. OpenFIPS201
+is open-source and is a relevant P10 reference for the owner-authentication (PIV card) side of
+the applet design.
+
 P10 is met for the chip platform. ✓
 
 ---

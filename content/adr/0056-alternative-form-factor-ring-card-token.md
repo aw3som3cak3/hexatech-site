@@ -44,8 +44,8 @@ one goes with the reporting chain. Personnel worldwide know the doctrine without
   hex orientation: pointy-top (one vertex at +Y / chain hole, one vertex at −Y)
 - **Electronics:** JCOP 4 (JavaCard 3.0.5 / GP 2.3.1) — chip selection per ADR-0059;
   chip has two logical partitions:
-  - **Public partition** (unauthenticated read): random session identifier only — see ADR-0057 Decision 1 for the amended policy (original: SURNAME, UUID, red-flag line — not adopted; conflicts with ADR-0024)
-  - **Protected partition** (authenticated read): full Tier 1 medical profile per ADR-0016
+  - **Public partition** (unauthenticated read): random session identifier only in sovereign mode (ADR-0057 Decision 1); in consumer mode Tier 1 emergency profile also returned unauthenticated (ADR-0061 Decision 1). Original: SURNAME, UUID, red-flag line — not adopted; conflicts with ADR-0024.
+  - **Protected partition** (authenticated read): full Tier 1 medical profile per ADR-0016 in sovereign mode; Tier 2 and above in both modes
 - **Antenna:** flat hexagonal 2-turn coil wound inside the laminate body; ~50–51 mm AC
   effective aperture; tuning capacitor specified to hold resonant frequency at 14.5–15 MHz
   (intentional detuning to compensate for body proximity and reader loading pulling resonance down); provides read range ≥ 2 cm (ADR-0052
@@ -56,7 +56,7 @@ one goes with the reporting chain. Personnel worldwide know the doctrine without
   partial face flange — edge protection, skin comfort, mild weather seal
 - **Chain hole:** at the top (+Y) vertex; fitted with a 316L stainless flange grommet
 
-#### 316L stainless flange grommet (UUID carrier — fire-survival layer)
+#### 316L stainless flange grommet (Tag Locator carrier — fire-survival layer)
 
 The grommet is pressed into the card's chain hole and serves two independent functions:
 
@@ -71,12 +71,12 @@ The grommet is pressed into the card's chain hole and serves two independent fun
    separate element.
 
 Grommet specification: 316L stainless, double-flange, 9 mm flange OD, 3.5 mm bore.
-Tag Locator laser-engraved on front flange face. Grommet centered at approximately 9 mm
-from the vertex to give a 4.5 mm margin between the flange edge and the hex boundary
-(chain-hole vertex = +Y vertex, pointy-top hex orientation; see card size decision).
-**⚠ Geometry verification required:** confirm in CAD that the grommet center gives the
-specified 4.5 mm flange-to-boundary margin; this must be validated before manufacturing
-drawings are issued.
+Tag Locator laser-engraved on front flange face. Grommet centered at approximately 10.4 mm
+from the vertex along the bisector, giving a ~4.5 mm flange-to-boundary clearance
+(10.4 × sin 60° − 4.5 ≈ 4.5 mm; chain-hole vertex = +Y vertex, pointy-top hex orientation).
+**⚠ Engraving space note:** 9 mm OD with 3.5 mm bore leaves only 2.75 mm of radial ring width
+for engraving on the flange face. Confirm font size and 11-char Tag Locator fit in CAD before
+finalising the grommet drawing.
 
 **Card grommet:** barrel height = 3.5 mm (CARD_T). **Tear-away grommet:** barrel height =
 2.5 mm (TOKEN_T). Both have 0.8 mm flanges on each face. Chain bore through both elements
@@ -109,19 +109,21 @@ to the main neck chain, easily separated by the first responder who encounters t
 
 - **Chain hole:** at the top (+Y) vertex; fitted with a 316L stainless double-flange grommet
   (9 mm flange OD, 3.5 mm bore, 2.5 mm barrel to match TOKEN_T). The chain passes through
-  the steel bore, protecting the hex edge from wear when the tear-away is pulled free. UUID
-  is engraved on the grommet front flange face — matching the card grommet and the engraved
-  face, giving three independent UUID carriers on a single body.
+  the steel bore, protecting the hex edge from wear when the tear-away is pulled free.
+  Tag Locator is engraved on the grommet front flange face — matching the card grommet and
+  the engraved face, giving three independent Tag Locator engravings on a single body.
 - **Fire survival:** 316L melts at 1,375–1,400 °C; grommet and full identity fields survive structural fire
 
 **⚠ RF stacking risk (review 2026-11-09):** A solid 316L disc (54 mm × 2.5 mm) forms a large
 conducting plane at 13.56 MHz. When tag and tear-away are worn stacked together on the neck chain,
 the steel disc attenuates the NFC magnetic field via eddy currents — an effect significantly larger
 than the 9 mm grommet alone. Reads may fail in the stacked configuration. This is distinct from the
-grommet RF question (OQ-29). Mitigation options: (a) ferrite sheet between the elements, (b) an
+grommet RF question (OQ-29). Mitigation options: (a) ferrite sheet between the elements, or (b) an
 orientation doctrine requiring the reader to present to the card face with the tear-away oriented
-away, or (c) accept that reliable reads require the tear-away to be unclipped first. Physical
-prototype testing at Gate 1 must include the stacked configuration. See OQ-33.
+away. Option (c) "unclip tear-away for the read" is excluded: the tear-away doctrine (ADR-0063 1b)
+limits separation to confirmed KIA; a wounded person cannot unclip their own tear-away, and a
+responder should not unclip it. Physical prototype testing at Gate 1 must include the stacked
+configuration. See OQ-33.
 
 ### Why no NFC on the tear-away
 
@@ -134,18 +136,18 @@ synchronized. In practice:
 - The two chips diverge; it becomes unclear which is current
 - Two-chip synchronization failures would occur faster than hardware wear-out
 
-The reporting chain's actual need is a UUID they can enter into the casualty log system.
-The UUID is on the engraved face. No chip is required.
+The reporting chain's actual need is a Tag Locator they can enter into the casualty log system.
+The Tag Locator is on the engraved face. No chip is required.
 
 This is consistent with ADR-0027 (identity broker — pointers, not copies): the physical
-token holds a pointer (UUID); the network holds the data.
+token holds a pointer (Tag Locator); the network holds the data.
 
 ### Why no separate Ti ring
 
 The Ti Gr5 ring in the previous alternative (ADR-0056 rev 1) provided fire-survivable
 physical identification. In this design, that function is served by:
 
-1. The 316L steel grommet on the card (UUID, always on chain)
+1. The 316L steel grommet on the card (Tag Locator, always on chain)
 2. The 316L steel tear-away (full identity fields, may have been taken but typically present)
 
 Both elements are fire-survivable at structural fire temperatures. The Ti ring added cost
@@ -155,7 +157,9 @@ the ring.
 
 ## Sealed manufacturing unit
 
-The grommet, card, surround, and tear-away form a single manufacturing unit. At the enrollment event the **Enrollment ID** is written to the chip and the
+The JCOP card, grommet, and silicone surround form a **sealed card assembly**. The 316L
+tear-away is enrolled in the same transaction but is a physically separate element.
+At the enrollment event the **Enrollment ID** is written to the chip and the
 **Tag Locator** is engraved on all physical carriers in one atomic transaction:
 
 1. **JCOP chip** — Enrollment ID written (never externally visible; physical carriers use Tag Locator)
@@ -166,11 +170,12 @@ The grommet, card, surround, and tear-away form a single manufacturing unit. At 
 The silicone surround is bonded at manufacture with mechanical retention (a 0.6–0.8 mm
 peripheral channel in the card laminate edge). The card is not removable without destroying the
 surround. PII (name, unit, allergies) is added to the tear-away and card face at personalisation,
-after UUID enrollment. **Card-only re-enrollment is supported** (ADR-0057 Decision 2): a replacement JCOP card
-receives the same Enrollment ID and Tag Locator; the physical elements (tear-away,
-grommet) remain valid and are not replaced. Full unit replacement is also an option when
-physical elements are damaged. Individual element swap requires a controlled enrollment
-transaction; it is not performed in the field without enrollment authority oversight.
+after Tag Locator enrollment. **Card assembly reissue**: a replacement sealed card assembly
+(JCOP card + grommet + surround) receives the same Enrollment ID and Tag Locator (ADR-0057
+Decision 2); the steel tear-away remains valid independently. The grommet moves with the card
+assembly — it is not transferred to a new assembly without a controlled enrollment transaction.
+Full system replacement (card assembly + tear-away) is also an option. Neither reissue type
+is performed in the field without enrollment authority oversight.
 
 ## Separation doctrine
 
@@ -203,7 +208,7 @@ specialist; steel tear-away from precision machining shop.
 | Hex antenna coil (wound, bonded in laminate) | $3–5 | $2–4 | $1–2 |
 | Card face engraving / hot-emboss | $1–2 | $0.80–1.50 | $0.50–1 |
 | Silicone hex surround (injection mould + part) | $1–2 | $0.50–1 | $0.20–0.50 |
-| 316L grommet (turned, UUID engraved) | $3–5 | $2–4 | $1–2 |
+| 316L grommet (turned, Tag Locator engraved) | $3–5 | $2–4 | $1–2 |
 | Grommet press-fit + QC | $0.50–1 | $0.30–0.60 | $0.20–0.40 |
 | **Card subtotal** | **$17.50–33** | **$10.60–23.10** | **$5.90–12.40** |
 
@@ -293,8 +298,8 @@ military ID.
 
 9. **Steel tear-away NFC field shielding:** the 316L tear-away (54 mm × 2.5 mm) is a large
    conducting disc that may attenuate the NFC field when stacked with the tag on the neck
-   chain. See OQ-33 for options and resolution path. Gate 1 test must include the stacked
-   configuration.
+   chain. See OQ-33 for options (note: "unclip tear-away first" excluded per ADR-0063 1b KIA
+   doctrine). Gate 1 test must include the stacked configuration.
 
 8. **Card size** *(resolved 2026-11-09):* **54 mm across-corners.** The original 48 mm was
    chosen for US dog tag equivalence (51 × 29 mm, ~1,350 mm²), which is not a requirement
@@ -316,7 +321,7 @@ military ID.
    field strength at 2 cm by ~27%, extending undetuned range by ~11%. Two turns still
    correct. One mandatory action before coil order: inductance L increases ~14% with the
    larger aperture; recalculate the tuning capacitor C to hold resonant frequency at
-   14.5–15 MHz (intentional detuning to compensate for body proximity and reader loading). Inlay drawing must specify a
+   14.5–15 MHz (intentional detuning to compensate for body proximity and reader loading pulling resonance down). Inlay drawing must specify a
    10 mm OD antenna keep-out circle centred on the grommet bore.
 
    **ID review (2026-11-09):** confirmed. 8 engraving rows at 3 mm resolves OQ-7 (character
@@ -343,7 +348,8 @@ P1 attribution exception for consumer mode — see ADR-0061 Decision 1a. ⚠ (co
 Single JCOP card eliminates the synchronization failure mode of two data-carrying chips.
 The physical cache is simpler and has fewer failure modes than the ring-and-core design. ✓
 
-**P3 (only data that changes emergency action):** Identification fields (name, UUID, unit)
-and emergency red-flag line preserved on both elements. Blood type excluded per ADR-0014.
-Enrollment date added to signal data freshness — this is contextual, not treatment-directing,
-and complies with the principle's "low harm if wrong" criterion. ✓
+**P3 (only data that changes emergency action):** Identification fields (name, Tag Locator,
+unit) on both physical elements; emergency medical data in the JCOP Tier 1 partition. The
+tear-away carries identification only — no red-flag or medical data. Blood type excluded per
+ADR-0014. Enrollment date added to signal data freshness — this is contextual, not treatment-
+directing, and complies with the principle's "low harm if wrong" criterion. ✓

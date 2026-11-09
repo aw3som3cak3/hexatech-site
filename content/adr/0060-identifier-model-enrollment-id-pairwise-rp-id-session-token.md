@@ -154,8 +154,9 @@ The transparency log records read receipts, not identifiers. ✓
 
 **P9 (identity/signing require user verification; medical read never does):**
 Identifiers do not by themselves trigger signing or identity operations. Session Token is
-returned pre-auth (no personal data). Enrollment ID is returned only to authenticated
-authorised sessions. ✓
+returned pre-auth (no personal data). Enrollment ID is never released to relying parties —
+authenticated terminals receive the Pairwise RP ID (ADR-0062; consistent with Decision 1
+"Never released to relying parties"). ✓
 
 ---
 
@@ -173,7 +174,8 @@ authorised sessions. ✓
   Enrollment ID cannot be reproduced for reissue (a new ID would be assigned, invalidating
   physical elements on existing tear-aways).
 - The enrollment system must implement collision detection for Tag Locators.
-- The locator derivation must be reproduced identically for every reissue.
+- Reissue reads the stored Tag Locator from the account record — it is not re-derived. The
+  derivation formula is used at initial issuance only.
 
 **What we give up:**
 - The option of deriving the short-ID from chip hardware (ADR-0040's original approach).
