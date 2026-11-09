@@ -394,10 +394,12 @@ military ID.
    (ISO 14443-2 standard obligation for ISO 14443-4 certified chips; see H_min reference below).
    The derating calculation is documented here:
 
-   **H_min reference (closed on ISO 14443-2):** field-strength requirements for PICCs are in
-   ISO/IEC 14443-2 (RF power and signal interface). A compliant PICC must operate at H_min ≤ 1.5 A/m
-   (ISO 14443-2 minimum); the P71D600 is ISO 14443-4 certified, so this is a standard obligation.
-   Using 1.5 A/m as a conservative worst case is closed on this basis. ADR-0065 measurement 11
+   **H_min reference (provisionally closed on ISO 14443-2; PICC class confirmation required):** field-strength requirements for PICCs are in
+   ISO/IEC 14443-2 (RF power and signal interface). A compliant PICC must operate at H_min depending
+   on PICC class: 1.5 A/m applies to PICC classes 1–3; classes 4–6 have higher H_min values. The
+   P71D600's exact PICC class must be confirmed with NXP before the power budget is finalized.
+   The current calculation uses 1.5 A/m as a provisional estimate; if the P71D600 is a higher PICC
+   class, the power margin may be tighter than calculated. ADR-0065 measurement 11
    (calibrated field generator) is optional — if equipment is available it provides useful data,
    but it is not a Gate 1 pass criterion.
 

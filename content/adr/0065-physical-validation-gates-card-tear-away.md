@@ -51,13 +51,13 @@ no-ferrite baseline for inductance measurement only.
 
 1. Resonant frequency, config A (no ferrite, no grommet). Records baseline inductance L and calculates expected tuning capacitor C. No pass/fail target — this is an inductance measurement only.
 2. Resonant frequency, config B (grommet + ferrite installed). **Initial prototype target: 14.5–15 MHz.** Record grommet+ferrite-induced shift from measurement 1. The production tuning target is set from this measurement.
-3. Loaded Q factor at resonance, configs A and B (loaded Q = measured with JCOP chip attached and antenna tuned; not unloaded coil-only Q). **Pass criterion: loaded Q 15–35 at 13.56 MHz (config B — grommet installed, chip attached).** Q < 15 reduces power margin; Q > 35 narrows bandwidth and attenuates the 847 kHz load-modulation sidebands, degrading communication. Confirm acceptable window with the inlay vendor before specifying. See ADR-0056 OQ-9 for the derating calculation.
+3. Loaded Q factor at resonance, configs A and B (loaded Q = measured with JCOP chip attached and antenna tuned; not unloaded coil-only Q). **Design target / diagnostic: Q 15–35 at 13.56 MHz (config B — grommet installed, chip attached). This is not a Gate 1 pass/fail criterion.** Q < 15 risks insufficient power margin; Q > 35 narrows bandwidth and attenuates the 847 kHz load-modulation sidebands. Record the measured value for the inlay vendor and use it to refine the tuning capacitor spec; treat transaction completion (measurement 9) and activation range (measurements 4, 6, 8) as the actual reliability criteria. Note: ISO 14443-2 PICC class dependency applies — 1.5 A/m is the H_min for PICC classes 1–3; classes 4–6 have higher minima. Confirm the P71D600's PICC class with NXP before interpreting OQ-9's power budget calculation.
 4. Read range sweep 0–50 mm, config B. Reader: standard NFC smartphone (conservative minimum). Pass: ISO 14443A activation ≥ 2 cm.
 5. Resonant frequency and Q, config C. Records body-loading shift.
 6. Read range sweep, config C. **Pass criterion: ISO 14443A activation ≥ 2 cm on smartphone.**
 7. Read range sweep, tear-away stacked directly (no ferrite), free air. Expected fail — record attenuation baseline (OQ-33 reference).
 8. Read range sweep, config D. **Hard pass criterion: ISO 14443A activation ≥ 2 cm on smartphone.**
-9. **End-to-end transaction test, config D:** in the operational minimum configuration (stacked with ferrite, body-loaded), complete a full emergency transaction sequence without losing power: ISO 14443A activation → applet selection → Tier 1 profile transfer → chip-signed receipt → authenticated reader exchange (if sovereign mode available). **Phone model requirements:** minimum 3 models; must include at least (a) one iPhone running Core NFC (Apple's reader has different antenna placement and field strength to Android) and (b) one low-end Android (not a flagship; representative of a field medic's device). **Per-phone pass criterion:** ≥ 4 of 5 trials per phone model complete the full transaction without field loss. A design that passes only on a strong-field flagship fails Gate 1. Total minimum 15 trials (5 per phone, 3 phones). This supplements activation-only testing with the actual operational requirement.
+9. **End-to-end transaction test, config D:** in the operational minimum configuration (stacked with ferrite, body-loaded), complete a full emergency transaction sequence without losing power: ISO 14443A activation → applet selection → Tier 1 profile transfer → chip-signed receipt → authenticated reader exchange (if sovereign mode available). **Phone model requirements:** minimum 3 models; must include at least (a) one iPhone running Core NFC (Apple's reader has different antenna placement and field strength to Android) and (b) one low-end Android (not a flagship; representative of a field medic's device). **Per-phone pass criterion:** ≥ 4 of 5 trials per phone model complete the full transaction without field loss. A design that passes only on a strong-field flagship fails Gate 1. Total minimum 15 trials (5 per phone, 3 phones). This supplements activation-only testing with the actual operational requirement. **Note:** this threshold is an engineering feasibility gate for prototype evaluation, not a production qualification threshold. Production deployment criteria must be defined separately once field-use requirements are confirmed, with higher sample counts, documented failure modes, and recovery-time measurements.
 10. Field symmetry: compare read range at card centre vs. near-grommet vertex vs. opposite vertex.
 11. P71D600 activation field (if calibrated field generator available): confirm H at 2 cm from test reader exceeds P71D600 H_min from datasheet.
 12. Supplementary: resonant frequency with neck chain draped in worn position, config D + chain.
@@ -72,7 +72,7 @@ inlay drawing is specified with the ferrite sheet in-situ.
 
 ### Gate 1 passes when
 
-Measurements 3, 4, 6, 8, and 9 all pass: loaded Q 15–35 (config B, chip attached); ISO 14443A activation ≥ 2 cm in configs B, C, and D; full Tier 1 transaction completes at ≥ 4/5 trials per phone model across 3+ phone models (including iPhone and low-end Android) in config D. Configurations E and F are expected fails; their results are recorded as documented limitations, not pass/fail items.
+Measurements 4, 6, 8, and 9 all pass: ISO 14443A activation ≥ 2 cm in configs B, C, and D; per-phone pass criterion met for transaction completion in config D (measurement 9). Measurement 3 (loaded Q) is a diagnostic and design target — its value is recorded and reported to the inlay vendor, but it does not block Gate 1 passage. Configurations E and F are expected fails; their results are recorded as documented limitations, not pass/fail items.
 
 ---
 
@@ -149,6 +149,15 @@ on first attempt, or self-correct on first attempt after a failed read.
 activity simulation (reaching, bending, kneeling, standing, walking). Record any separations.
 
 **Pass criterion for Scenario C:** zero inadvertent separations across all 10 participants.
+
+**Scenario C2 — Overlapping-element recovery:** participant is handed the assembled system with the tear-away randomly stacked in front of the card (not the wearing position). No instruction is given about which element to move or why. Participant is asked: "If you needed to scan this, what would you do?" Score: (a) participant moves the tear-away to expose the card front face, and (b) successful emergency-profile display is achieved.
+
+**Pass criteria for Scenario C2 (overlapping recovery):**
+1. ≥ 8/10 participants discover and perform the handling step (move tear-away aside, present NFC icon face) without instruction.
+2. Measure elapsed time from hand-off to successful scan. Record median and worst-case time for each participant.
+3. No participant attempts to detach any element from the chain (would violate ADR-0063 Decision 1b and indicates doctrine failure).
+
+This scenario validates that the NFC icon on the front face is a sufficient cue for an untrained responder to self-correct the stacked configuration. If ≥ 3/10 participants fail to discover the handling step, doctrine marking (NFC icon, text cues) must be revised before Gate 3 is re-run.
 
 **Doctrine marking validation:** record what on-hardware cues participants cite when they succeed.
 If the "KIA ONLY" and NFC-icon markings are present, record whether these were cited. This validates
