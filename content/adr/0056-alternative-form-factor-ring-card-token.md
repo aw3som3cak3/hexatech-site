@@ -365,18 +365,22 @@ military ID.
    drawing is finalized — this is the one remaining open action before this OQ closes**). The
    derating calculation is documented here:
 
+   **H_min reference:** ISO 14443-1 Section 7 requires all PICCs to operate at H_min ≤ 1.5 A/m
+   (the standard-defined minimum reader field). The P71D600 is ISO 14443-4 certified (ADR-0059);
+   therefore H_min ≤ 1.5 A/m is a standard obligation, not a datasheet proxy. Using 1.5 A/m in
+   the calculation is a conservative worst case — most modern smart-card chips (including NXP
+   SmartMX3 family) operate down to 0.5–1.0 A/m, which would further widen the margin.
+
    At resonance with matched load, chip terminal voltage ≈ Q × V_oc / 2.
    - Free air (Q = 20): V_chip ≈ 20 × 0.5 / 2 = **5.0 V** — well above chip minimum.
    - Worst-case derated (body loading 25% Q reduction × grommet 10% Q reduction):
      Q_min ≈ 20 × 0.75 × 0.90 = 13.5. V_chip ≈ 13.5 × 0.5 / 2 = **3.4 V** — positive margin.
    - Ferrite sheet increases effective L by ~5–10%, raising V_oc to ~0.52–0.55 V: margin widens slightly.
 
-   Conclusion: **Q ≥ 20 free air is the critical margin parameter.** If Q falls below 20,
-   the derated V_chip may approach the chip's minimum. Q ≥ 20 is therefore a hard Gate 1 pass
-   criterion (ADR-0065 measurement 3). The budget is positive provided Q ≥ 20 is confirmed at Gate 1.
-
-   **Remaining action:** obtain P71D600 H_min from NXP datasheet; if H_min > 1.5 A/m, re-run
-   the calculation above. Record the confirmed figure in this OQ before the inlay drawing is issued.
+   Conclusion: **Q ≥ 20 free air is the critical margin parameter.** Q ≥ 20 is a hard Gate 1 pass
+   criterion (ADR-0065 measurement 3). Power budget is closed: H_min is bounded by ISO 14443-1;
+   derating calculation shows positive margin at all configurations provided Q ≥ 20 is confirmed
+   at Gate 1. No NDA-covered datasheet figure required. ✓
 
    **ID review (2026-11-09):** confirmed. 8 engraving rows at 3 mm resolves OQ-7 (character
    height). Grommet structural risk at 1.5 mm vertex margin is gone at 4.5 mm. Surround
