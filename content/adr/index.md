@@ -70,5 +70,7 @@
 | [0064](0064-editorial-corrections-0033-0040-0044-0049.md) | Editorial corrections — ADR-0033, ADR-0040, ADR-0044, ADR-0049 | Accepted (amends ADR-0033, 0040, 0044, 0049) | P1, P2, P10 |
 | [0065](0065-physical-validation-gates-card-tear-away.md) | Physical validation gates — card + tear-away form factor | Accepted (card-form-factor counterpart to ADR-0052) | P1, P2 |
 | [0066](0066-adr-0034-amendment-allow-jcop-physical-spike.md) | Amend ADR-0034 — allow early JCOP physical spike; remove two-chip anti-collision gate | Accepted (amends ADR-0034) | P1, P10 |
+| [0067](0067-phase-a-scope-sovereign-only-consumer-deferred.md) | Phase A scope — sovereign mode only; consumer track deferred to Phase B | Accepted (amends ADR-0061; defers OQ-30, OQ-31, OQ-32) | P1, P2, P6 |
+| [0068](0068-jcop-applet-specification-phase-a.md) | JCOP applet specification — Phase A (sovereign mode) | **Proposed** | P1, P2, P5, P6, P9, P10 |
 
 New decision? Copy [template.md](template.md). Never delete an ADR; supersede it.
