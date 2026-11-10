@@ -4,7 +4,7 @@
 - **Date:** 2026-11-10
 - **Principles:** P1, P2, P5, P6, P9, P10
 - **Depends on:** ADR-0057 (V2 access model), ADR-0059 (JCOP platform), ADR-0060 (identifier model), ADR-0061 (mode split — sovereign only per ADR-0067), ADR-0062 (applet domain model), ADR-0063 (death confirmation), ADR-0064 (security corrections), ADR-0066 (physical spike permitted), ADR-0067 (Phase A scope)
-- **Resolves:** OQ-22 (offline credential expiry without trusted clock — decision required in this ADR)
+- **Resolves:** OQ-22 (offline credential expiry — 24-hour default terminal cert validity, configurable by deployment authority CA policy)
 
 ## Context
 
@@ -80,9 +80,9 @@ Per ADR-0057 Decision 3: Tier 2 requires user verification (UV) in addition to t
 2. `AUTHENTICATE` — terminal sends: challenge response signed with terminal key + UV attestation. Chip verifies both.
 3. `READ TIER 2` — returns pairwise RP ID (ADR-0060 Decision 2) and Tier 2 fields
 
-**OQ-22 (offline expiry — decision required before implementation):** the terminal certificate has an expiry date. The chip uses a ratchet clock (latest date seen in a valid terminal cert). An adversary who steals a valid terminal cert and keeps it offline can use it indefinitely — the chip has never seen a later date, so the cert has not expired from the chip's perspective. Read caps (ADR-0005) mitigate per-tag exposure but do not bound how many different tags a compromised reader can access offline.
+**Decision (resolves OQ-22):** terminal certificate validity is **24 hours by default**, configurable by the deployment authority's CA policy. The deployment authority sets the validity window when issuing terminal certs; shorter windows (minimum recommended: 1 hour) reduce offline exposure; longer windows (maximum recommended: 7 days, for extended remote operations) are permitted if the deployment authority explicitly accepts the residual risk in their security policy. The chip's ratchet clock enforces expiry relative to the latest valid date it has seen — it does not enforce a minimum validity window. Read caps (ADR-0005) provide a second layer of bound: even with a compromised terminal cert, the number of tags accessible offline is bounded by per-tag read caps.
 
-**Recommended decision:** 24-hour terminal certs, issued by an online CA the medic's device contacts at shift start. This bounds offline exposure to one shift. Explicit acceptance of residual risk is an alternative; it must be recorded as a threat model entry if chosen.
+The configurable validity window is a CA issuance parameter, not an applet parameter. No applet change is needed to adjust it between deployments.
 
 ---
 
@@ -186,7 +186,6 @@ Per ADR-0059: FIPS 140-3 certificate #4679 covers the P71D600 chip module and NX
 
 ## Open questions to resolve before implementation begins
 
-- **OQ-22 (offline expiry):** short-lived terminal certs (recommended: 24-hour) vs explicit acceptance of residual risk. Must decide before applet implementation; affects the ratchet clock and cap design.
 - **AID assignment:** RID registration with ISO/IEC JTC 1/SC 17 or via GP registry.
 - **Memory budget:** confirm P71D600 NVM partition size with NXP.
 - **Certification path:** choose option (a), (b), or (c) for pilot vs. production.
