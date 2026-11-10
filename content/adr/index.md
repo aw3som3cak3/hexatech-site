@@ -72,5 +72,7 @@
 | [0066](0066-adr-0034-amendment-allow-jcop-physical-spike.md) | Amend ADR-0034 — allow early JCOP physical spike; remove two-chip anti-collision gate | Accepted (amends ADR-0034) | P1, P10 |
 | [0067](0067-phase-a-scope-sovereign-only-consumer-deferred.md) | Phase A scope — sovereign mode only; consumer track deferred to Phase B | Accepted (amends ADR-0061; defers OQ-30, OQ-31, OQ-32) | P1, P2, P6 |
 | [0068](0068-jcop-applet-specification-phase-a.md) | JCOP applet specification — Phase A (sovereign mode) | **Proposed** | P1, P2, P5, P6, P9, P10 |
+| [0069](0069-terminal-session-model.md) | Terminal session model — deployment-duration certs, medic 2FA, offline-first | Accepted (amends ADR-0068 §4–5, ADR-0005) | P1, P2, P6, P9 |
+| [0070](0070-operational-states-card-form-factor.md) | Operational states — card form factor (Intact / Separated / Electronic-failure) | Accepted | P1, P2 |
 
 New decision? Copy [template.md](template.md). Never delete an ADR; supersede it.
