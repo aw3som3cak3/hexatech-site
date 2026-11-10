@@ -99,6 +99,18 @@ If a medic's session cannot be established because cert validity has expired (le
 
 This removes the 4–6 week PKI build from every deployment authority's setup task.
 
+### Decision 8 — Medic backup authentication when primary tag is unavailable
+
+**Failure scenario:** the medic's own Hexa tag is destroyed (blast, fire) or lost before shift start, preventing 3-factor session authentication (Decision 3).
+
+**Tier A — Reserve tag (preferred):** each medic is issued and enrolls a reserve Hexa tag at the pre-deployment enrollment session. The reserve is stored separately from the primary (e.g., medic bag rather than neck chain). The medic's enrollment record holds two enrolled chip public keys (primary + reserve). The app accepts a valid chip signature from either. No connectivity is required; the reserve tag is a full substitute for the primary in all respects.
+
+**Tier B — PIN-only degraded session (last resort):** if neither the primary nor the reserve tag is available, the medic may invoke degraded authentication: cert + PIN only, without the tag factor. This requires a deliberate opt-in action (not automatic). Reads in a degraded session are flagged: `AUTH_MODE: DEGRADED; REASON: NO_TAG_FACTOR`. The same receipt-queue rules as grace mode (Decision 6) apply. Tier 2 reads and casualty log appends remain available in degraded mode (unlike grace mode), because the cert + PIN factors are intact; only the physical-token factor is missing.
+
+Degraded mode is a last resort analogous to Decision 6: it preserves patient safety at the cost of weakened attribution. Deployment authority policy may impose additional controls for degraded sessions (e.g., mandatory CRL sync at next connectivity).
+
+**Consequence for enrollment workflow:** pre-deployment enrollment must provision two tags per medic (primary + reserve). The enrollment terminal must support multi-key enrollment for a single identity record. This is a new requirement on ADR-0068's enrollment APDU sequence.
+
 ---
 
 ## Principle tests
@@ -122,8 +134,10 @@ This removes the 4–6 week PKI build from every deployment authority's setup ta
 
 **What becomes harder:**
 - Every medic must be enrolled as a tag wearer — not just the service members they treat
+- Each medic requires two enrolled tags (primary + reserve), increasing tag inventory for medic roles
+- The enrollment terminal and registry must support multi-key enrollment (two chip public keys per identity record)
 - The reference CA is a software deliverable Hexatec must ship
-- The medic reader app must implement the tap-own-tag 2FA flow, which requires the app to store the medic's enrolled public key
+- The medic reader app must implement the tap-own-tag 2FA flow, which requires the app to store the medic's enrolled public key(s)
 
 **What we give up:**
 - Short-window cert expiry as a security control. Revocation + per-cert-serial caps replace it.
