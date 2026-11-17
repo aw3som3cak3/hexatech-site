@@ -90,12 +90,14 @@ The configurable validity window is a CA issuance parameter, not an applet param
 
 Per ADR-0057 D1/D2: the Session Token is returned pre-authentication to allow session initiation without identity disclosure. Mutual authentication follows.
 
-**Protocol:**
+**Protocol (ICAO EAC-style terminal authentication):**
 1. Reader sends `SELECT AID` → chip returns Session Token (not identity)
-2. Reader sends `INTERNAL AUTHENTICATE` with its terminal certificate
-3. Chip verifies certificate chain → grants access tier based on role
-4. Chip sends its own certificate (enrolled public key) → reader verifies
+2. Reader sends `MSE:Set DST` loading its terminal certificate parameters, then `PSO:Verify Certificate` to ship the certificate chain; chip verifies chain against stored trust anchor and determines access tier from role attribute
+3. Chip issues a challenge; reader signs it with its terminal private key and sends `EXTERNAL AUTHENTICATE`; chip verifies the signature — this proves the reader holds the matching private key
+4. Chip sends its own certificate (enrolled public key) → reader verifies (chip authentication)
 5. Session key established for the remainder of the NFC power cycle
+
+Note: `INTERNAL AUTHENTICATE` is the chip-side command used in step 4 (chip proves itself). `EXTERNAL AUTHENTICATE` in step 3 is the terminal-side command. The two must not be swapped.
 
 **Per-operation challenges:** each `READ TIER 2` and `APPEND CASUALTY LOG` command includes a fresh challenge; replay attacks across NFC power cycles are blocked by the Session Token.
 
@@ -113,8 +115,8 @@ Per ADR-0062 domain model and ADR-0063 death state machine.
 
 **Death state machine (ADR-0063 Decision 2):**
 - State: `ALIVE` | `DECEASED_PENDING` | `DECEASED_CONFIRMED`
-- `MARK DECEASED PENDING`: one authorised terminal (medic role)
-- `CONFIRM DECEASED`: second authorised terminal OR single-actor bypass with audit log entry
+- `MARK DECEASED PENDING`: one authorised terminal (medic role) → state → `DECEASED_PENDING`
+- `CONFIRM DECEASED`: **second authorised terminal only, with a distinct subject identifier** (ADR-0063 D1 — no single-actor bypass; the applet must reject `CONFIRM DECEASED` from the same subject as `MARK DECEASED PENDING`)
 - `READ DEATH STATE`: available to any Tier 1 authenticated terminal
 
 **Consumer mode append:** deferred per ADR-0067.
@@ -127,7 +129,8 @@ Per ADR-0005 (read caps) and ADR-0031 (receipt format).
 
 - **Read counter:** incremented on each `READ TIER 1` or `READ TIER 2`. Chip refuses reads beyond the configured offline cap. Cap reset requires enrollment terminal authentication.
 - **Receipt:** each read produces a chip-signed receipt: `hash(session_token || tier_data_hash || read_counter)`. Format per ADR-0031.
-- **Ratchet clock:** chip stores the latest `notBefore` date seen in any valid terminal certificate. Used as the offline clock reference for certificate expiry checks.
+- **Ratchet clock:** chip stores `max(notBefore)` of all validated terminal certificates seen — this establishes a time lower bound. **Rejection rule:** a presented certificate is rejected if `cert.notAfter < ratchet`. A cert whose `notAfter` falls before the lower bound has provably expired. (Note: the rejection rule uses `notAfter`, not `notBefore` — using `notBefore < ratchet` would incorrectly reject valid concurrent certificates issued on different dates.)
+- **Read cap exhaustion:** when the total read cap (ADR-0005) is reached, the current applet spec refuses all reads — this is a P1 violation for Tier 1 emergency access. Resolution deferred: see OQ-41 in open-questions.md. Interim position: the deployment authority should set the total cap high enough (≥ 10× expected medic interactions per deployment) that exhaustion is not a realistic scenario in Phase A.
 
 ---
 
@@ -144,7 +147,7 @@ Estimated allocations (per ADR-0062 domain model):
 | Mode flag + trust anchors (3 certs × ~1 KB) | ~3 KB |
 | Tier 1 emergency profile | ~2 KB |
 | Tier 2 extended profile | ~4 KB |
-| Casualty log (ring buffer, TBD entries) | ~8 KB |
+| Casualty log (append-only, 50 entries, LOG_FULL at capacity — ADR-0071) | ~10 KB |
 | Death state + audit trail | ~1 KB |
 | Counters + receipts | ~512 bytes |
 | **Total estimated** | **~19 KB** |
@@ -178,7 +181,7 @@ Per ADR-0059: FIPS 140-3 certificate #4679 covers the P71D600 chip module and NX
 
 **P6 (we route and store, we don't vouch):** deployment authority holds terminal CA; Hexatec does not. Chip key pair generated on-chip; Hexatec never holds the private key. ✓
 
-**P9 (identity/signing require UV; medical read never does):** Tier 1 (medical read) requires terminal cert authentication only — no biometric/UV, consistent with P9 (an unconscious owner can be identified). Tier 2 (identity/signing) requires UV attestation from the medic. ✓
+**P9 (identity/signing require UV; medical read never does):** Tier 1 (medical read) requires terminal cert authentication only — no biometric/UV from the owner, consistent with P9 (an unconscious owner can be identified). The pairwise RP ID (Tier 2, Identity domain) is returned to authenticated terminals without owner UV per ADR-0062 D1 — this is an explicitly accepted emergency identification exception, not a P9 violation. Identity attestations and signing operations (also Tier 2) require UV from the owner; they cannot be performed on an unconscious person, consistent with P9. Where UV is required (medic Tier 2 access, signing), it is the acting principal's UV, not the owner's. ✓
 
 **P10 (adopt existing standards):** JCOP 4, JavaCard 3.0.5, GP 2.3.1, ISO 7816-4, ISO 14443-4, ECC P-256, ECDSA. Terminal auth follows ICAO EAC-style PKI. No novel cryptography. ✓
 
@@ -189,5 +192,6 @@ Per ADR-0059: FIPS 140-3 certificate #4679 covers the P71D600 chip module and NX
 - **AID assignment:** RID registration with ISO/IEC JTC 1/SC 17 or via GP registry.
 - **Memory budget:** confirm P71D600 NVM partition size with NXP.
 - **Certification path:** choose option (a), (b), or (c) for pilot vs. production.
-- **Casualty log ring buffer size:** depends on expected operational duration between sync opportunities.
+- **Casualty log entry format:** resolved by ADR-0071 (50 entries, append-only, structured typed entries).
 - **Withheld state implementation:** per-field flag or whole-profile flag?
+- **Read cap exhaustion → Tier 1 blocked (P1):** see OQ-41 in open-questions.md. Phase A mitigation: set total cap high relative to expected interactions.
