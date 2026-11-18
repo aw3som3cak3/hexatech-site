@@ -33,7 +33,7 @@ This is a focus decision, not an architectural rejection. ADR-0061 defines consu
 
 ## Prior art
 
-- [IDF Digital Casualty Card System (Hadar et al., JMIR Med Inform 2026;14:e79808)](../references/dccs-idf-2026.md) — the IDF explicitly took the same MVP approach under operational pressure: "A Minimal Viable Product approach was adopted... deliberately excluding advanced features such as sensor integration and real-time data transfer between echelons." The system became operational within 2 weeks and improved documentation coverage 3.5× over paper. This is direct prior-art evidence for the Phase A MVP decision.
+- [IDF Digital Casualty Card System (Hadar et al., JMIR Med Inform 2026;14:e79808)](../references/dccs-idf-2026.md) — the IDF explicitly took an MVP approach under operational pressure: "A Minimal Viable Product approach was adopted... deliberately excluding advanced features such as sensor integration and real-time data transfer between echelons." The system became operational within 2 weeks and improved documentation coverage 3.5×. This supports the staged-deployment rationale in Phase A. **Important caveat:** the IDF MVP stripped PKI, authentication, and attribution features entirely — Hexa's Phase A retains sovereign PKI, EAC terminal authentication, and medic 2FA because P1 and P10 require attributability and sovereignty. The comparable element is the deployment discipline (ship a working subset; defer features that require more time), not the feature set.
 
 ## Principle tests
 

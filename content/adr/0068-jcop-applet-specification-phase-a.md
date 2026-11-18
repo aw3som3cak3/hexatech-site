@@ -136,7 +136,7 @@ Per ADR-0005 (read caps) and ADR-0031 (receipt format).
 
 ## 8. Memory budget
 
-**P71D600 user partition:** [TO BE CONFIRMED with NXP] — typical JCOP 4 user NVM is 72–144 KB depending on configuration.
+**P71D600 Flash NVM:** up to 450 KB gross (confirmed from N7122/P71D600 distributor specs); 12.3 KB RAM. User-available applet storage is in the 80–320 KB range depending on JCOP version and card configuration — confirm exact partition with NXP application engineering before the inlay order.
 
 Estimated allocations (per ADR-0062 domain model):
 
@@ -147,10 +147,12 @@ Estimated allocations (per ADR-0062 domain model):
 | Mode flag + trust anchors (3 certs × ~1 KB) | ~3 KB |
 | Tier 1 emergency profile | ~2 KB |
 | Tier 2 extended profile | ~4 KB |
-| Casualty log (append-only, 50 entries, LOG_FULL at capacity — ADR-0071) | ~10 KB |
+| Casualty log (append-only, 200 entries, LOG_FULL at capacity — ADR-0071) | ~20 KB |
 | Death state + audit trail | ~1 KB |
 | Counters + receipts | ~512 bytes |
-| **Total estimated** | **~19 KB** |
+| **Total estimated** | **~29 KB** |
+
+> **Amended by ADR-0072** (2026-11-18): log domain raised from 50 entries / 10 KB to 200 entries / 20 KB following ADR-0071 entry format decisions (event_time field, entry count increase, death entry size). Extended APDU support (ISO 7816-4 §5.3.2) required for death entry types (0x09, 0x0A) in §6.
 | **Reserve for Phase B (consumer path)** | ~4 KB |
 | **Total with reserve** | **~23 KB** |
 
