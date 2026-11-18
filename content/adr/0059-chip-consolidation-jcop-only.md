@@ -172,3 +172,13 @@ This was rejected in ADR-0058 and the rejection stands.
 **Use DESFire EV3:**
 Rejected in ADR-0058. No ECDSA signing; AES-128 only. Cannot meet P1's attributable-record
 requirement without a formal exception ADR. This rejection is unchanged.
+
+---
+
+## Prior art
+
+- [US Army Personal Information Carrier (PIC) programme, 1996–2017](../references/us-army-digital-dog-tag-history.md) — the US Army spent $34M+ on a contact-based flash card digital dog tag, reaching ~13,000 troops in Iraq/Afghanistan by 2006. By 2017 the programme had effectively died: "so far no one has developed an electronic ID tag that can survive a combat zone." The failure mode was architecture-specific: physical contact ports fill with sand and corrode. This directly validates JCOP 4's passive NFC choice — no ports, no connectors, tap at 2–4 cm. The Army never built a contactless version.
+
+- [IDF Digital Casualty Card System, 2023–24](../references/dccs-idf-2026.md) — the IDF's V3 used a passive NFC chip on a dog tag worn by the casualty, readable by any tablet. It worked: 3.5× documentation improvement in active operations (Hadar et al., JMIR Med Inform 2026;14:e79808). JCOP 4 (ISO 14443, passively powered) is in the same hardware family as the chip the IDF deployed. This is live operational proof that passive NFC on a wearable tag survives field conditions and achieves the documentation goal. The two programmes together confirm the architecture: passive NFC is the chip class that works; contact-based is the chip class that doesn't.
+
+See [Market context](../market-insights.md) for the full evidence base.
