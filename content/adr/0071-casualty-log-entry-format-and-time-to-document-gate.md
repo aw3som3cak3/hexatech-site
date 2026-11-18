@@ -84,20 +84,18 @@ Codes 0x0C–0xFF reserved for Phase B extension.
 
 > **On-chip signature verification:** the applet verifies the ECDSA-P256 half of the hybrid signature on-chip (JCOP 4 supports ECDSA natively). The ML-DSA-44 half cannot be verified on-chip — JCOP 4 has no PQC primitive support (ADR-0033). The applet stores the full payload verbatim and countersigns it; ML-DSA verification is performed by the reader app or backend. This is an explicit constraint, not an implementation gap.
 
-Common entries with event_time set: 12 + 4 + 1–5 = 17–21 bytes. A typical log (200 entries, mix of common types, 0–1 death entry):
-- 198 common entries × ~20 bytes = ~3,960 bytes
-- 2 death entries × 3,084 bytes = ~6,168 bytes
-- Total: ~10,128 bytes
+Common entries with event_time set: 12 + 4 + 1–5 = 17–21 bytes. At ~20 bytes/entry, 20 KB accommodates approximately **1,000 typical entries**. 72-hour prolonged field care at vitals every 5 minutes = 864 VITALS entries × 21 bytes ≈ 18 KB, within the byte cap with headroom for treatment entries. Death entries count at actual size (up to 3,084 bytes each) — the byte cap naturally handles variable-size entries.
 
-Reserve **20 KB** for the log domain (updated from 10 KB). This allows 200 entries with event_time on all entries, plus two death entries, with ~10 KB headroom for VITALS-heavy logs and future Phase B entry types. The P71D600 Flash NVM (up to 450 KB gross; 80–320 KB user-available depending on configuration) accommodates this alongside the emergency profile (~2–5 KB), identity domain (~4 KB), and system overhead.
+Reserve **20 KB** for the log domain. The applet enforces a **byte cap**: LOG_FULL when cumulative log bytes reach 20 KB. This supersedes the entry-count cap model (see ADR-0072). The P71D600 Flash NVM (up to 450 KB gross; 80–320 KB user-available depending on configuration) accommodates this alongside the emergency profile (~2–5 KB), identity domain (~4 KB), and system overhead.
 
 ### Decision 2 — Applet validates structure, not content
 
 The applet checks:
 1. Entry type is a known code (0x01–0x0B for Phase A).
 2. Payload length matches the stated `payload_length` field (2 bytes).
-3. For death entries (0x09, 0x0A): the death state machine preconditions are met per ADR-0063.
-4. Terminal is Tier 2 authenticated (medic PKI cert) per ADR-0069.
+3. Cumulative log bytes after this append would not exceed the 20 KB byte cap. LOG_FULL returned if the entry would exceed the cap.
+4. For death entries (0x09, 0x0A): the death state machine preconditions are met per ADR-0063.
+5. Terminal is Tier 2 authenticated (medic PKI cert) per ADR-0069.
 
 The applet does NOT validate clinical values (drug codes, dose ranges, vital sign plausibility). That is the medic app's responsibility. The applet is a store; the app is the gatekeeper for clinical content.
 
@@ -112,7 +110,7 @@ For the four tourniquet entries (the most time-critical):
 
 For other entry types: the app may require additional selections, but the common path for each type (e.g., the most recently used drug, the most recently used fluid volume) should be reachable in ≤ 3 taps from the authenticated main screen.
 
-**Undo and correction:** a 10-second same-session undo is available for accidental commits within one NFC session. For errors discovered after the session closes, the medic can append a **VOID entry (0x0B)** in a subsequent session. See Decision 5.
+**Undo and correction:** a 10-second same-session undo is available for accidental commits within one NFC session. The undo **appends a VOID entry (0x0B)** with reason code `0x00 ACCIDENTAL`; the original entry is preserved (append-only semantics are never violated). For errors discovered after the session closes, the medic appends a VOID entry in a subsequent authenticated session. See Decision 5.
 
 **Time entry for retrospective documentation:** the app must support entering a past event time, not only "now." The default is the current time; the medic can adjust backward. The adjustment UI must be operable with nitrile gloves — large touch targets, 1-minute scroll increments, or a numeric keypad. When the medic sets a past time, the app sets flag bit 1 (`event_time_present`) and prepends `event_time_offset` (minutes since enrollment epoch, computed from the medic's clock) as the first 4 bytes of the payload. This is a Track C app design requirement, not an applet constraint.
 
@@ -165,7 +163,8 @@ The append-only log cannot overwrite or delete entries. The 10-second same-sessi
 **VOID entry layout (payload):**
 ```
 [seq_num: 2 bytes]      — 0-indexed sequence number of the entry being voided
-[reason_code: 1 byte]   — 0x01 WRONG_LIMB · 0x02 WRONG_DRUG · 0x03 WRONG_PATIENT
+[reason_code: 1 byte]   — 0x00 ACCIDENTAL (10-second same-session undo)
+                          0x01 WRONG_LIMB · 0x02 WRONG_DRUG · 0x03 WRONG_PATIENT
                           0x04 DUPLICATE · 0xFF OTHER
 ```
 
@@ -201,7 +200,7 @@ The applet stores typed entries written by a medic. It does not compute drug int
 **What becomes possible:**
 - ADR-0068 §6 "format TBD" is resolved; applet implementation can begin.
 - Stage 0 includes a formal time-to-document gate aligned with the operational evidence from IDF DCCS deployment.
-- The 200-entry log at ≤ 20 KB fits the revised memory budget with headroom for VITALS-heavy logs.
+- The 20 KB byte-capped log accommodates ~1,000 typical entries, covering 72-hour prolonged field care scenarios (864 VITALS entries × 21 bytes ≈ 18 KB).
 
 **What becomes harder:**
 - The closed-list values (drug codes, dose indices) must go through clinical review per ADR-0032 before the Phase A applet is finalised. This is a pre-start task for Track B in the PoC plan.
@@ -209,6 +208,12 @@ The applet stores typed entries written by a medic. It does not compute drug int
 
 **What we give up:**
 - Flexible free-form documentation per entry. The closed lists in Phase A are intentionally narrow — coverage of the most common treatments only. Phase B can extend with additional entry types. This trade-off is explicit: a faster, narrower form completes; a richer, slower form gets skipped.
+
+**Phase A known limitations (design questions deferred to Phase B or Track C):**
+- **Reader signature (OQ-45):** entries carry no terminal-side signature — attribution relies on `subject_hash` + chip countersig + session receipt (ADR-0031). Full per-entry terminal signatures add ~64 bytes overhead per entry; deferred to Phase B.
+- **Combat lifesaver / buddy-aid append (OQ-43):** only Tier 2 authenticated medic cert holders may append. CLS and buddy-aid appending their own interventions requires extending cert issuance to non-medic unit members — a PKI scaling problem deferred to Phase B. Phase A workaround: medics document observed buddy-aid; attribution is to the documenting medic.
+- **Civilian hospital access (OQ-42):** civilian hospitals lack the deployment authority terminal cert required for Tier 1 reads in sovereign mode. Phase B design question: a civilian gateway service holding a cert and bridging to FHIR/HL7.
+- **FHIR / trauma registry export (OQ-44):** Track C (app/backend) requirement. Entry types map to FHIR Procedure/Observation resources; the reader app or receiving-facility backend performs the mapping. No applet change required; a mapping specification ADR is needed before clinical deployment.
 
 ---
 

@@ -127,10 +127,10 @@ Per ADR-0062 domain model and ADR-0063 death state machine.
 
 Per ADR-0005 (read caps) and ADR-0031 (receipt format).
 
-- **Read counter:** incremented on each `READ TIER 1` or `READ TIER 2`. Chip refuses reads beyond the configured offline cap. Cap reset requires enrollment terminal authentication.
+- **Tier 1 read counter:** incremented on each `READ TIER 1`. Cap set to 65,535 (effectively uncapped — a tag read 10×/day for 2 years reaches ~7,300 reads). Blocking Tier 1 emergency access on cap grounds is a direct P1 violation; the high cap resolves OQ-41. Cap reset requires enrollment terminal authentication.
+- **Tier 2 read counter:** incremented on each `READ TIER 2`. Cap per ADR-0005 defaults: 500 total reads per tag; 50 per cert serial per ADR-0069 §4. Chip refuses Tier 2 reads beyond the per-cert or total cap. Cap reset requires enrollment terminal authentication.
 - **Receipt:** each read produces a chip-signed receipt: `hash(session_token || tier_data_hash || read_counter)`. Format per ADR-0031.
 - **Ratchet clock:** chip stores `max(notBefore)` of all validated terminal certificates seen — this establishes a time lower bound. **Rejection rule:** a presented certificate is rejected if `cert.notAfter < ratchet`. A cert whose `notAfter` falls before the lower bound has provably expired. (Note: the rejection rule uses `notAfter`, not `notBefore` — using `notBefore < ratchet` would incorrectly reject valid concurrent certificates issued on different dates.)
-- **Read cap exhaustion:** when the total read cap (ADR-0005) is reached, the current applet spec refuses all reads — this is a P1 violation for Tier 1 emergency access. Resolution deferred: see OQ-41 in open-questions.md. Interim position: the deployment authority should set the total cap high enough (≥ 10× expected medic interactions per deployment) that exhaustion is not a realistic scenario in Phase A.
 
 ---
 
@@ -147,12 +147,12 @@ Estimated allocations (per ADR-0062 domain model):
 | Mode flag + trust anchors (3 certs × ~1 KB) | ~3 KB |
 | Tier 1 emergency profile | ~2 KB |
 | Tier 2 extended profile | ~4 KB |
-| Casualty log (append-only, 200 entries, LOG_FULL at capacity — ADR-0071) | ~20 KB |
+| Casualty log (append-only, LOG_FULL at 20 KB byte cap — ADR-0071) | ~20 KB |
 | Death state + audit trail | ~1 KB |
 | Counters + receipts | ~512 bytes |
 | **Total estimated** | **~29 KB** |
 
-> **Amended by ADR-0072** (2026-11-18): log domain raised from 50 entries / 10 KB to 200 entries / 20 KB following ADR-0071 entry format decisions (event_time field, entry count increase, death entry size). ISO 7816-4 command chaining required for death entry types (0x09, 0x0A) in §6; extended APDUs are unreliable on low-end Android NFC controllers (see ADR-0071 Decision 1).
+> **Amended by ADR-0072** (2026-11-18): log domain byte reservation raised from 10 KB to 20 KB; cap model changed from entry count to byte cap (ADR-0071 Decisions 1–2). ISO 7816-4 command chaining required for death entry types (0x09, 0x0A) in §6; extended APDUs are unreliable on low-end Android NFC controllers (see ADR-0071 Decision 1).
 | **Reserve for Phase B (consumer path)** | ~4 KB |
 | **Total with reserve** | **~23 KB** |
 
@@ -194,6 +194,6 @@ Per ADR-0059: FIPS 140-3 certificate #4679 covers the P71D600 chip module and NX
 - **AID assignment:** RID registration with ISO/IEC JTC 1/SC 17 or via GP registry.
 - **Memory budget:** confirm P71D600 NVM partition size with NXP.
 - **Certification path:** choose option (a), (b), or (c) for pilot vs. production.
-- **Casualty log entry format:** resolved by ADR-0071 (50 entries, append-only, structured typed entries).
+- **Casualty log entry format:** resolved by ADR-0071 (byte-capped at 20 KB, append-only, structured typed entries).
 - **Withheld state implementation:** per-field flag or whole-profile flag?
-- **Read cap exhaustion → Tier 1 blocked (P1):** see OQ-41 in open-questions.md. Phase A mitigation: set total cap high relative to expected interactions.
+- **Read cap exhaustion → Tier 1 blocked (P1):** resolved — Tier 1 and Tier 2 read counters split in §7; Tier 1 cap set to 65,535 (effectively uncapped). OQ-41 resolved.
