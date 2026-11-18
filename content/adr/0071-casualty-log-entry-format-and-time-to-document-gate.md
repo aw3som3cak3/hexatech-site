@@ -16,6 +16,10 @@ The IDF's Digital Casualty Card System ([Hadar et al., JMIR Med Inform 2026;14:e
 - Their system required multiple UI steps and version iterations before it was fast enough for field use.
 - The first-to-fail under fire is documentation; the fix is making the most common entries one-tap, not restructuring the security model.
 
+**Operational model:** Under direct fire, formal documentation is not possible. Standard TCCC practice is to write critical information — tourniquet time, limb — on whatever is available: the casualty's skin, the tourniquet strap, a strip of tape. The chip is not competing with this. The chip is where that informal record is structured, time-stamped, and attributed at the first safe moment — cover, casualty collection point, during evacuation. Its value is for the rest of the treatment chain: each echelon reads what was done before, adds its own entries, and the whole record travels with the casualty to hospital as a chip-signed log. No paper card to lose, no verbal handoff to misremember, no transcription errors between echelons.
+
+This means the primary documentation scenario is **retrospective entry**: a medic documenting what they did minutes to hours earlier, from memory or from the informal marker they made at the time. Real-time documentation (entering an action as it happens) is a secondary scenario for moments when conditions allow it. Stage 0 must test both.
+
 ADR-0065 Gate 3 tests physical separation usability. There is no equivalent gate for the documentation workflow. Stage 0 (ADR-0029 origin, carried into the PoC plan) previously included a stopwatch test that was not preserved in the current plan. This ADR restores it as a formal Stage 0 test.
 
 ## Decisions
@@ -88,7 +92,9 @@ For the four tourniquet entries (the most time-critical):
 
 For other entry types: the app may require additional selections, but the common path for each type (e.g., the most recently used drug, the most recently used fluid volume) should be reachable in ≤ 3 taps from the authenticated main screen.
 
-The underlying principle: documentation UX that requires more than 5 seconds for the most common action will be skipped under fire. Building the security model on a foundation that is too slow to use is not a security improvement.
+**Time entry for retrospective documentation:** the app must support entering a past time, not only "now." The default is the current time; the medic can adjust backward. The adjustment UI must be operable with nitrile gloves — large touch targets, 1-minute scroll increments, or a numeric keypad. The `time_applied_offset_minutes` field stores minutes since the tag enrollment epoch, so any past time is representable; the app computes the offset from the medic's clock. This is a Track C app design requirement, not an applet constraint.
+
+The underlying principle: documentation UX that cannot support retrospective entry will not be used. The medic who applied the tourniquet was under fire; they will document it later.
 
 ### Decision 4 — Stage 0 time-to-document test
 
@@ -98,14 +104,23 @@ A time-to-document test is added to Stage 0 alongside the existing Stage 0 usabi
 
 **Environment:** indoor, dimmed to simulate low-light conditions (target ≤ 50 lux). NFC phone held in one hand; Hexa prototype tag on a chain around the neck of a mannequin or volunteer.
 
-**Task A — Tourniquet (primary pass criterion):**
+**Task A1 — Tourniquet, real-time (secondary scenario):**
 Participant is told: "You have just applied a tourniquet to this casualty's right arm. Document it."
 - Start time: verbal instruction ends
 - Stop time: NFC field disengages (transaction complete) OR participant declares done
 
 Pass criterion: ≥ 4/5 participants complete an authenticated Tier 2 append of a TOURNIQUET R_ARM entry in ≤ 5 seconds from the start cue.
 
-Rationale for 5 seconds: the IDF identified documentation as the first task dropped under fire. A 5-second ceiling on the most critical action (tourniquet timing directly affects limb salvage decision) is both meaningful and achievable with a well-designed one-tap flow. This threshold is consistent with the ≥ 80% / small-N formative test framing in the PoC plan — with n=5, ≥ 4/5 means 80%.
+Rationale: real-time entry can occur during evacuation or at a casualty collection point. The 5-second ceiling is achievable with a one-tap flow and validates that the app does not add friction in moments that allow immediate documentation.
+
+**Task A2 — Tourniquet, retrospective (primary scenario):**
+Participant is handed a marker before the scenario begins. They are told: "Eight minutes ago you applied a tourniquet to this casualty's left leg. Write the time 14:23 on your palm — that is what you wrote on the casualty at the time." *(pause while they do this)* "Now document it on the chip."
+- Start time: "Now document it" instruction ends
+- Stop time: NFC field disengages (transaction complete) OR participant declares done
+
+Pass criterion: ≥ 4/5 participants complete an authenticated Tier 2 append of a TOURNIQUET L_LEG entry with time 14:23 (± 1 minute) in ≤ 15 seconds from the start cue, with nitrile gloves.
+
+Rationale: retrospective entry is the dominant operational pattern — the tourniquet was applied under fire; documentation happens at the first safe opportunity. The marker step replicates the TCCC practice of writing tourniquet time on the casualty's skin. The 15-second ceiling is more generous than Task A1 because the medic is not under fire, but the time-entry UI must still be operable with gloves. Tourniquet timing directly affects limb salvage decisions downstream; an incorrect or missing time in the chip record is a patient safety concern for the surgeons who were not present.
 
 **Task B — Casualty state:**
 Participant is told: "Mark this casualty as T1 Immediate."
