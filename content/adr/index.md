@@ -75,6 +75,6 @@
 | [0069](0069-terminal-session-model.md) | Terminal session model — deployment-duration certs, medic 2FA, offline-first | Accepted (amends ADR-0068 §4–5, ADR-0005) | P1, P2, P6, P9 |
 | [0070](0070-operational-states-card-form-factor.md) | Operational states — card form factor (Intact / Separated / Electronic-failure) | Accepted | P1, P2 |
 | [0071](0071-casualty-log-entry-format-and-time-to-document-gate.md) | Casualty log entry format and time-to-document gate | **Proposed** | P1, P3, P4, P8 |
-| [0072](0072-applet-memory-budget-amendment-log-domain.md) | Applet memory budget amendment — log domain (amends ADR-0068 §8) | Accepted | P1, P3 |
+| [0072](0072-applet-memory-budget-amendment-log-domain.md) | Applet memory budget amendment — log domain (amends ADR-0068 §8) | Proposed | P1, P3 |
 
 New decision? Copy [template.md](template.md). Never delete an ADR; supersede it.

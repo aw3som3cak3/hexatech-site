@@ -32,11 +32,11 @@ Each casualty log entry is a typed binary record. The applet stores entries as a
 
 ```
 [type: 1 byte]
-[flags: 1 byte]           — bit 0: unverified (DEGRADED mode active per ADR-0069 §7)
+[flags: 1 byte]           — bit 0: unverified (DEGRADED mode active per ADR-0069 §8)
                            — bit 1: event_time_present (see below)
                            — bits 2–7: reserved 0
 [timestamp_offset: 4 bytes]   — unsigned minutes since tag enrollment epoch; always the COMMIT time
-[cert_serial_hash: 4 bytes]   — low 32 bits of SHA-256(terminal cert serial)
+[subject_hash: 4 bytes]       — low 32 bits of SHA-256(terminal cert subject identifier); person-bound, stable across device replacement
 [payload_length: 2 bytes]     — length of entire payload field, placed before payload
 [payload: variable, type-specific, see below]
 ```
@@ -47,7 +47,7 @@ Total overhead: 12 bytes per entry header. Payload bounded per type.
 
 Applies to entry types: TOURNIQUET, HEMORRHAGE_CONTROL, AIRWAY, MEDICATION, FLUID, VITALS, CASUALTY_STATE, DEATH_DECLARATION, COUNTERSIGN_DEATH. Does not apply to FREE_FLAG (the commit time is the note time). The applet does not validate that `event_time_offset ≤ timestamp_offset`; the medic app enforces this in the UI.
 
-> **Note on grace mode:** ADR-0069 §6 explicitly prohibits casualty log appends in grace mode. The `unverified` flag therefore reflects DEGRADED mode only (ADR-0069 §7), not grace. ADR-0069 §7 defines degraded mode as the fallback when the medic's secondary factor (own tag 2FA) cannot be completed but a valid terminal cert chain is present.
+> **Note on grace mode:** ADR-0069 §6 explicitly prohibits casualty log appends in grace mode. The `unverified` flag therefore reflects DEGRADED mode only (ADR-0069 §8), not grace. ADR-0069 §7 defines degraded mode as the fallback when the medic's secondary factor (own tag 2FA) cannot be completed but a valid terminal cert chain is present.
 
 **Entry types (Phase A):**
 
@@ -80,19 +80,21 @@ Codes 0x0C–0xFF reserved for Phase B extension.
 - Route: 0=IV, 1=IO, 2=IM, 3=PO, 4=IN, 5=OTHER
 - Triage: 0=T1_IMMEDIATE, 1=T2_DELAYED, 2=T3_MINIMAL, 3=T4_EXPECTANT
 
-**Memory:** Worst-case entry is DEATH_DECLARATION at 12 + 3072 = 3084 bytes; this requires extended APDU support (ISO 7816-4 §5.3.2). ADR-0033 specifies hybrid ECDSA (~64 bytes) + ML-DSA-44 (~2.4 KB) for death declarations. The applet spec (ADR-0068) must explicitly support extended APDUs for 0x09, 0x0A entry types.
+**Memory:** Worst-case entry is DEATH_DECLARATION at 12 + 3072 = 3084 bytes. ADR-0033 specifies hybrid ECDSA (~64 bytes) + ML-DSA-44 (~2.4 KB) for death declarations. Because extended APDU support is unreliable on Android NFC controllers (`IsoDep.isExtendedLengthApduSupported()` returns false on many low-end devices, including Gate 1 target hardware), death entry types (0x09, 0x0A) **must use ISO 7816-4 command chaining** (CLA bit 4 set, standard APDU data blocks of ≤ 255 bytes each), not extended APDUs. JCOP 4 / JavaCard 3.0.5 supports command chaining; the applet handles reassembly. The applet spec (ADR-0068 §6) must state command chaining, not extended APDUs.
+
+> **On-chip signature verification:** the applet verifies the ECDSA-P256 half of the hybrid signature on-chip (JCOP 4 supports ECDSA natively). The ML-DSA-44 half cannot be verified on-chip — JCOP 4 has no PQC primitive support (ADR-0033). The applet stores the full payload verbatim and countersigns it; ML-DSA verification is performed by the reader app or backend. This is an explicit constraint, not an implementation gap.
 
 Common entries with event_time set: 12 + 4 + 1–5 = 17–21 bytes. A typical log (200 entries, mix of common types, 0–1 death entry):
 - 198 common entries × ~20 bytes = ~3,960 bytes
 - 2 death entries × 3,084 bytes = ~6,168 bytes
 - Total: ~10,128 bytes
 
-Reserve **20 KB** for the log domain (updated from 10 KB). This allows 200 entries with event_time on all entries, plus two death entries, with ~10 KB headroom for VITALS-heavy logs and future Phase B entry types. The P71D600's nominal 80 KB EEPROM accommodates this alongside the emergency profile (~2–5 KB), identity domain (~4 KB), and system overhead.
+Reserve **20 KB** for the log domain (updated from 10 KB). This allows 200 entries with event_time on all entries, plus two death entries, with ~10 KB headroom for VITALS-heavy logs and future Phase B entry types. The P71D600 Flash NVM (up to 450 KB gross; 80–320 KB user-available depending on configuration) accommodates this alongside the emergency profile (~2–5 KB), identity domain (~4 KB), and system overhead.
 
 ### Decision 2 — Applet validates structure, not content
 
 The applet checks:
-1. Entry type is a known code (0x01–0x0A for Phase A).
+1. Entry type is a known code (0x01–0x0B for Phase A).
 2. Payload length matches the stated `payload_length` field (2 bytes).
 3. For death entries (0x09, 0x0A): the death state machine preconditions are met per ADR-0063.
 4. Terminal is Tier 2 authenticated (medic PKI cert) per ADR-0069.
@@ -115,25 +117,6 @@ For other entry types: the app may require additional selections, but the common
 **Time entry for retrospective documentation:** the app must support entering a past event time, not only "now." The default is the current time; the medic can adjust backward. The adjustment UI must be operable with nitrile gloves — large touch targets, 1-minute scroll increments, or a numeric keypad. When the medic sets a past time, the app sets flag bit 1 (`event_time_present`) and prepends `event_time_offset` (minutes since enrollment epoch, computed from the medic's clock) as the first 4 bytes of the payload. This is a Track C app design requirement, not an applet constraint.
 
 The underlying principle: documentation UX that cannot support retrospective entry will not be used. The medic who applied the tourniquet was under fire; they will document it later.
-
-### Decision 5 — VOID entry type (0x0B)
-
-The append-only log cannot overwrite or delete entries. The 10-second same-session undo (Decision 3) handles immediate accidental commits. For errors discovered after the session closes — wrong limb, wrong drug code, duplicate entry — the medic appends a VOID entry in a subsequent authenticated session.
-
-**VOID entry layout (payload):**
-```
-[seq_num: 2 bytes]      — 0-indexed sequence number of the entry being voided
-[reason_code: 1 byte]   — 0x01 WRONG_LIMB · 0x02 WRONG_DRUG · 0x03 WRONG_PATIENT
-                          0x04 DUPLICATE · 0xFF OTHER
-```
-
-**Applet enforcement:**
-1. The VOID entry's `cert_serial_hash` must match the `cert_serial_hash` of the entry at `seq_num`. A medic may only void their own entries.
-2. `seq_num` must reference an existing, not-yet-voided entry. Voiding a VOID entry is rejected.
-3. VOID entries cannot void death entries (0x09, 0x0A). Death declarations are irrevocable at the applet level.
-4. A voided entry remains in the log and is returned on read; the reader app displays it as superseded. No data is deleted.
-
-**Display rule for medic apps:** a voided entry is shown with a strikethrough or "VOIDED" marker, with the VOID entry's timestamp and reason. The original entry value is preserved and shown to allow audit.
 
 ### Decision 4 — Stage 0 time-to-document test
 
@@ -174,6 +157,26 @@ Pass criterion: ≥ 4/5 participants complete an authenticated CASUALTY_STATE T1
 Record the duration from initial NFC field engagement to transaction complete for each task. Median and worst-case reported to design team. If worst-case hold time exceeds 4 seconds, RF link margin and authentication latency should be reviewed.
 
 **Gate 3 amendment:** ADR-0065 Gate 3 must be re-run with the revised app (incorporating Stage 0 UX feedback) before first deployment. The time-to-document test is a Stage 0 formative test; it is not a substitute for Gate 3.
+
+### Decision 5 — VOID entry type (0x0B)
+
+The append-only log cannot overwrite or delete entries. The 10-second same-session undo (Decision 3) handles immediate accidental commits. For errors discovered after the session closes — wrong limb, wrong drug code, duplicate entry — the medic appends a VOID entry in a subsequent authenticated session.
+
+**VOID entry layout (payload):**
+```
+[seq_num: 2 bytes]      — 0-indexed sequence number of the entry being voided
+[reason_code: 1 byte]   — 0x01 WRONG_LIMB · 0x02 WRONG_DRUG · 0x03 WRONG_PATIENT
+                          0x04 DUPLICATE · 0xFF OTHER
+```
+
+**Applet enforcement:**
+1. The applet extracts the `subject_hash` from the authenticated terminal cert of the person appending the VOID, and compares it to the `subject_hash` of the entry at `seq_num`. A medic may void their own entries from any subsequently enrolled device — `subject_hash` is person-bound (derived from the cert subject identifier), not device-bound.
+2. Exception: a terminal cert with the medical-officer role attribute (per ADR-0063 death confirmation cert profiles) may void any entry regardless of `subject_hash`, to allow supervisor correction. Medical-officer VOID entries are distinguishable in the transparency log by role.
+3. `seq_num` must reference an existing, not-yet-voided entry. Voiding a VOID entry is rejected.
+4. VOID entries cannot void death entries (0x09, 0x0A). Death declarations are irrevocable at the applet level.
+5. A voided entry remains in the log and is returned on read; the reader app displays it as superseded. No data is deleted.
+
+**Display rule for medic apps:** a voided entry is shown with a strikethrough or "VOIDED" marker, with the VOID entry's timestamp and reason. The original entry value is preserved and shown to allow audit.
 
 ---
 
@@ -218,5 +221,5 @@ The applet stores typed entries written by a medic. It does not compute drug int
 - **Drug code list (Phase A):** ATC code subset selection requires clinical review. Recommended starting point: drugs carried in a standard NATO combat medic kit. ADR-0032 governs the list as an open standard.
 - **Timestamp epoch:** ~~enrollment vs deployment-start~~ **Resolved:** use enrollment timestamp. Simpler; avoids the complexity of distributing a deployment epoch to all terminals before the first append.
 - **Task C hold time target:** if measured worst-case hold time in Stage 0 exceeds 4 seconds, the total workflow (auth + UI) may need separate optimisation work before Gate 3.
-- **Extended APDU confirmation:** the applet spec (ADR-0068) must explicitly confirm extended APDU support (ISO 7816-4 §5.3.2) on the P71D600 for death entry types (0x09, 0x0A) before the applet spec is finalised.
-- **Memory budget amendment to ADR-0068:** the log domain reservation in ADR-0068 §8 must increase from 10 KB to 20 KB. This is a consequential change to an Accepted ADR and requires a new ADR or amendment before Stage 1 prototype build begins.
+- ~~**Extended APDU confirmation:**~~ **Resolved** — command chaining mandated for death entry types (0x09, 0x0A) per Decision 1; extended APDUs are unreliable on low-end Android NFC controllers. ADR-0068 §6 to specify command chaining.
+- ~~**Memory budget amendment to ADR-0068:**~~ **Resolved** by ADR-0072 — log domain raised to 200 entries / 20 KB.

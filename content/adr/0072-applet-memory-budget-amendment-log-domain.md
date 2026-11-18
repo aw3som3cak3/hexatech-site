@@ -1,6 +1,6 @@
 # ADR-0072: Applet memory budget amendment — log domain
 
-- **Status:** Accepted
+- **Status:** Proposed
 - **Date:** 2026-11-18
 - **Principles:** P1, P3
 - **Amends:** ADR-0068 §8 (memory budget table, log domain row only)
@@ -30,7 +30,7 @@ Update the casualty log row in ADR-0068 §8 as follows:
 
 The P71D600 has up to 450 KB Flash NVM (gross), confirmed from NXP distributor sources (N7122/P71D600 spec sheets). User-available applet storage is in the 80–320 KB range depending on JCOP version and card configuration, with the low end already 2.75× the 29 KB data budget. Applet bytecode and GlobalPlatform overhead (typically 100–200 KB combined) leave substantial headroom for Phase B domains.
 
-**Extended APDU requirement (new):** ADR-0068 §6 (`APPEND CASUALTY LOG ENTRY`) must add a note that death entry types (0x09, 0x0A) require extended APDU support per ISO 7816-4 §5.3.2. This is a conformance clarification, not a new feature — JCOP 4 / JavaCard 3.0.5 supports extended APDUs; the applet must declare and handle them. The applet spec detail (Track B, Stage 0 Task A1) must include this explicitly.
+**Command chaining requirement (replaces extended APDU):** ADR-0068 §6 (`APPEND CASUALTY LOG ENTRY`) must specify ISO 7816-4 command chaining (CLA bit 4 set, standard APDU data blocks of ≤ 255 bytes each) for death entry types (0x09, 0x0A). Extended APDUs are unreliable on low-end Android NFC controllers (`IsoDep.isExtendedLengthApduSupported()` returns false on Gate 1 target devices); command chaining is universally supported. JCOP 4 / JavaCard 3.0.5 supports command chaining; the applet must handle reassembly. The applet spec detail (Track B, Stage 0 Task A1) must specify command chaining explicitly.
 
 No other rows in ADR-0068 §8 change. ADR-0068 remains the authoritative applet specification; this ADR amends only the values in §8.
 

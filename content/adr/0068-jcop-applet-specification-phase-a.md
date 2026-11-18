@@ -152,7 +152,7 @@ Estimated allocations (per ADR-0062 domain model):
 | Counters + receipts | ~512 bytes |
 | **Total estimated** | **~29 KB** |
 
-> **Amended by ADR-0072** (2026-11-18): log domain raised from 50 entries / 10 KB to 200 entries / 20 KB following ADR-0071 entry format decisions (event_time field, entry count increase, death entry size). Extended APDU support (ISO 7816-4 §5.3.2) required for death entry types (0x09, 0x0A) in §6.
+> **Amended by ADR-0072** (2026-11-18): log domain raised from 50 entries / 10 KB to 200 entries / 20 KB following ADR-0071 entry format decisions (event_time field, entry count increase, death entry size). ISO 7816-4 command chaining required for death entry types (0x09, 0x0A) in §6; extended APDUs are unreliable on low-end Android NFC controllers (see ADR-0071 Decision 1).
 | **Reserve for Phase B (consumer path)** | ~4 KB |
 | **Total with reserve** | **~23 KB** |
 
