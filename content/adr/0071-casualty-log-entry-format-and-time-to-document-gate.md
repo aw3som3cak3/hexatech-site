@@ -9,7 +9,7 @@
 
 ADR-0068 §6 defines the `APPEND CASUALTY LOG ENTRY` command and its pre-conditions but marks the entry format as "TBD in applet spec detail." This ADR fills that gap.
 
-The IDF's Digital Casualty Card System (Hadar et al., JMIR Med Inform 2026;14:e79808) provides directly relevant operational evidence:
+The IDF's Digital Casualty Card System ([Hadar et al., JMIR Med Inform 2026;14:e79808](../references/dccs-idf-2026.md)) provides directly relevant operational evidence:
 
 - The IDF reached only 39% documentation coverage even with dedicated training and a mature system, because documentation competes with treatment time.
 - Their primary treatments were tourniquet application (15%), IV access (48%), and whole blood — a small set of time-critical actions.
@@ -149,6 +149,10 @@ The applet stores typed entries written by a medic. It does not compute drug int
 - Flexible free-form documentation per entry. The closed lists in Phase A are intentionally narrow — coverage of the most common treatments only. Phase B can extend with additional entry types. This trade-off is explicit: a faster, narrower form completes; a richer, slower form gets skipped.
 
 ---
+
+## Prior art
+
+- [IDF Digital Casualty Card System (Hadar et al., JMIR Med Inform 2026;14:e79808)](../references/dccs-idf-2026.md) — primary evidence base for this ADR. NFC tag on casualty, air-gapped operation, MVP approach, treatment frequency data informing entry type priority.
 
 ## Open questions
 

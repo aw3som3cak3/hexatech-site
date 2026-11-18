@@ -31,6 +31,10 @@ This is a focus decision, not an architectural rejection. ADR-0061 defines consu
 
 4. **Target deployment for Phase A:** sovereign pilot with Försvarsmakten or equivalent NATO member. Terminal PKI enrollment and certificate management are in scope.
 
+## Prior art
+
+- [IDF Digital Casualty Card System (Hadar et al., JMIR Med Inform 2026;14:e79808)](../references/dccs-idf-2026.md) — the IDF explicitly took the same MVP approach under operational pressure: "A Minimal Viable Product approach was adopted... deliberately excluding advanced features such as sensor integration and real-time data transfer between echelons." The system became operational within 2 weeks and improved documentation coverage 3.5× over paper. This is direct prior-art evidence for the Phase A MVP decision.
+
 ## Principle tests
 
 **P1 (break-glass offline; attributable):** sovereign mode produces a chip-signed, terminal-signed treatment record — the strongest form of P1's attributable record requirement. The consumer fallback is not needed to satisfy P1 for the pilot. ✓

@@ -26,6 +26,10 @@ factor, which may or may not be built. This ADR defines the card form factor dat
 only. Ring form factor data assignment is a separate concern left for if and when that
 form factor is revisited.
 
+## Prior art
+
+- [IDF Digital Casualty Card System (Hadar et al., JMIR Med Inform 2026;14:e79808)](../references/dccs-idf-2026.md) — the IDF arrived at the same "data travels with the casualty" design (their V3: NFC chip on a dog-tag worn by the casualty, readable by any tablet) independently through operational failure of device-to-device approaches. Validates Decision 3 of this ADR.
+
 ## Decisions
 
 ### Decision 1 — The tag (JCOP hex card) is the sole electronic element
