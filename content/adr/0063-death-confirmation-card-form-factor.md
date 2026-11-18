@@ -7,6 +7,8 @@
 - **Consistent with:** ADR-0023 (two-key death confirmation — principle preserved)
 - **Depends on:** ADR-0062 (tag and tear-away data model)
 
+> **Amended by ADR-0073** (2026-11-18): Decision 2 state machine gains a DECEASED_PENDING → ALIVE transition via RETRACT_DECLARATION entry type (ADR-0071 0x0C), enabling retraction of a pending death declaration before countersigning.
+
 > **Note:** this ADR is accepted for the card + tear-away form factor. Its production deployment is conditional on ADR-0056 passing Gates 1 and 2. Death-confirmation protocol is ready for applet implementation.
 
 ## Context

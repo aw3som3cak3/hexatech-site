@@ -66,7 +66,7 @@
 | [0060](0060-identifier-model-enrollment-id-pairwise-rp-id-session-token.md) | Identifier model — enrollment ID, pairwise RP ID, and session token | Accepted | P2, P5, P7, P9 |
 | [0061](0061-consumer-tier1-access-and-sovereign-mode-split.md) | Consumer Tier 1 access and sovereign mode split — amends ADR-0057 Decision 1 | Accepted (amends ADR-0057) | P1, P5, P9 |
 | [0062](0062-tag-and-tear-away-data-model.md) | Tag and tear-away data model — card form factor | Accepted | P1, P2, P3, P5 |
-| [0063](0063-death-confirmation-card-form-factor.md) | Death confirmation — card form factor (amends ADR-0056, ADR-0023) | Accepted (amends ADR-0023, ADR-0056) | P1, P8, P9 |
+| [0063](0063-death-confirmation-card-form-factor.md) | Death confirmation — card form factor (amends ADR-0056, ADR-0023) | Accepted (amends ADR-0023, ADR-0056; amended by ADR-0073) | P1, P8, P9 |
 | [0064](0064-editorial-corrections-0033-0040-0044-0049.md) | Editorial corrections — ADR-0033, ADR-0040, ADR-0044, ADR-0049 | Accepted (amends ADR-0033, 0040, 0044, 0049) | P1, P2, P10 |
 | [0065](0065-physical-validation-gates-card-tear-away.md) | Physical validation gates — card + tear-away form factor | Accepted (card-form-factor counterpart to ADR-0052) | P1, P2 |
 | [0066](0066-adr-0034-amendment-allow-jcop-physical-spike.md) | Amend ADR-0034 — allow early JCOP physical spike; remove two-chip anti-collision gate | Accepted (amends ADR-0034) | P1, P10 |
@@ -76,5 +76,6 @@
 | [0070](0070-operational-states-card-form-factor.md) | Operational states — card form factor (Intact / Separated / Electronic-failure) | Accepted | P1, P2 |
 | [0071](0071-casualty-log-entry-format-and-time-to-document-gate.md) | Casualty log entry format and time-to-document gate | **Proposed** | P1, P3, P4, P8 |
 | [0072](0072-applet-memory-budget-amendment-log-domain.md) | Applet memory budget amendment — log domain (amends ADR-0068 §8) | Proposed | P1, P3 |
+| [0073](0073-death-state-amendment-retract-pending.md) | Death state machine amendment — RETRACT_DECLARATION while PENDING (amends ADR-0063) | Proposed | P1, P9 |
 
 New decision? Copy [template.md](template.md). Never delete an ADR; supersede it.

@@ -47,7 +47,7 @@ Total overhead: 12 bytes per entry header. Payload bounded per type.
 
 Applies to entry types: TOURNIQUET, HEMORRHAGE_CONTROL, AIRWAY, MEDICATION, FLUID, VITALS, CASUALTY_STATE, DEATH_DECLARATION, COUNTERSIGN_DEATH. Does not apply to FREE_FLAG (the commit time is the note time). The applet does not validate that `event_time_offset ≤ timestamp_offset`; the medic app enforces this in the UI.
 
-> **Note on grace mode:** ADR-0069 §6 explicitly prohibits casualty log appends in grace mode. The `unverified` flag therefore reflects DEGRADED mode only (ADR-0069 §8), not grace. ADR-0069 §7 defines degraded mode as the fallback when the medic's secondary factor (own tag 2FA) cannot be completed but a valid terminal cert chain is present.
+> **Note on grace mode:** ADR-0069 §6 explicitly prohibits casualty log appends in grace mode. The `unverified` flag therefore reflects DEGRADED mode only (ADR-0069 §8), not grace. ADR-0069 §8 defines degraded mode as the fallback when the medic's secondary factor (own tag 2FA) cannot be completed but a valid terminal cert chain is present.
 
 **Entry types (Phase A):**
 
@@ -66,8 +66,9 @@ Payload bytes shown here **exclude** the leading `event_time_offset (4)` bytes t
 | 0x09 | DEATH_DECLARATION | person_a_signed_payload (hybrid ECDSA + ML-DSA per ADR-0033) | ≤ 3072 |
 | 0x0A | COUNTERSIGN_DEATH | person_b_signed_payload (hybrid ECDSA + ML-DSA per ADR-0033) | ≤ 3072 |
 | 0x0B | VOID | seq_num (2) + reason_code (1) | 3 |
+| 0x0C | RETRACT_DECLARATION | (no type-specific payload) | 0 |
 
-Codes 0x0C–0xFF reserved for Phase B extension.
+Codes 0x0D–0xFF reserved for Phase B extension.
 
 > **VITALS update:** SBP (systolic blood pressure, stored as SBP ÷ 2 to fit one byte, range 0–510 mmHg) and RR (respiratory rate in breaths/minute, range 0–255) added to address the missing TCCC card fields noted in clinical review.
 
@@ -84,16 +85,23 @@ Codes 0x0C–0xFF reserved for Phase B extension.
 
 > **On-chip signature verification:** the applet verifies the ECDSA-P256 half of the hybrid signature on-chip (JCOP 4 supports ECDSA natively). The ML-DSA-44 half cannot be verified on-chip — JCOP 4 has no PQC primitive support (ADR-0033). The applet stores the full payload verbatim and countersigns it; ML-DSA verification is performed by the reader app or backend. This is an explicit constraint, not an implementation gap.
 
-Common entries with event_time set: 12 + 4 + 1–5 = 17–21 bytes. At ~20 bytes/entry, 20 KB accommodates approximately **1,000 typical entries**. 72-hour prolonged field care at vitals every 5 minutes = 864 VITALS entries × 21 bytes ≈ 18 KB, within the byte cap with headroom for treatment entries. Death entries count at actual size (up to 3,084 bytes each) — the byte cap naturally handles variable-size entries.
+Common entries with event_time set: 12 + 4 + 1–5 = 17–21 bytes. At ~20 bytes/entry, the 14 KB common-entry budget accommodates approximately 700 typical entries. 72-hour prolonged field care at vitals every 5 minutes = 864 VITALS entries × 21 bytes ≈ 18 KB — a VITALS-heavy log may reach the common-entry limit around hour 55; LOG_FULL for common entries before the death-entry reservation is consumed is an expected late-deployment scenario.
 
-Reserve **20 KB** for the log domain. The applet enforces a **byte cap**: LOG_FULL when cumulative log bytes reach 20 KB. This supersedes the entry-count cap model (see ADR-0072). The P71D600 Flash NVM (up to 450 KB gross; 80–320 KB user-available depending on configuration) accommodates this alongside the emergency profile (~2–5 KB), identity domain (~4 KB), and system overhead.
+Reserve **20 KB** for the log domain. The applet enforces a **two-bucket byte cap**:
+- **Common entries** (0x01–0x08, 0x0B, 0x0C): LOG_FULL when cumulative non-death bytes ≥ 14 KB.
+- **Death entries** (0x09, 0x0A): 6 KB reserved within the 20 KB total; LOG_FULL for death entries when cumulative death bytes ≥ 6 KB. This reserves space for two death entries (up to 3,084 bytes each) even when the common log is full.
+
+This supersedes the single-bucket cap model (see ADR-0072). The P71D600 Flash NVM (up to 450 KB gross; 80–320 KB user-available depending on configuration) accommodates this alongside the emergency profile (~2–5 KB), identity domain (~4 KB), and system overhead.
 
 ### Decision 2 — Applet validates structure, not content
 
 The applet checks:
-1. Entry type is a known code (0x01–0x0B for Phase A).
+1. Entry type is a known code (0x01–0x0C for Phase A).
 2. Payload length matches the stated `payload_length` field (2 bytes).
-3. Cumulative log bytes after this append would not exceed the 20 KB byte cap. LOG_FULL returned if the entry would exceed the cap.
+3. Byte cap check (two buckets):
+   - Non-death entries (0x01–0x08, 0x0B, 0x0C): cumulative non-death bytes + this entry ≤ 14 KB.
+   - Death entries (0x09, 0x0A): cumulative death bytes + this entry ≤ 6 KB.
+   LOG_FULL returned if the relevant bucket would overflow.
 4. For death entries (0x09, 0x0A): the death state machine preconditions are met per ADR-0063.
 5. Terminal is Tier 2 authenticated (medic PKI cert) per ADR-0069.
 
@@ -170,12 +178,24 @@ The append-only log cannot overwrite or delete entries. The 10-second same-sessi
 
 **Applet enforcement:**
 1. The applet extracts the `subject_hash` from the authenticated terminal cert of the person appending the VOID, and compares it to the `subject_hash` of the entry at `seq_num`. A medic may void their own entries from any subsequently enrolled device — `subject_hash` is person-bound (derived from the cert subject identifier), not device-bound.
-2. Exception: a terminal cert with the medical-officer role attribute (per ADR-0063 death confirmation cert profiles) may void any entry regardless of `subject_hash`, to allow supervisor correction. Medical-officer VOID entries are distinguishable in the transparency log by role.
+2. Exception: a terminal cert with the medical-officer role attribute (per ADR-0069 §7 cert profiles) may void any entry regardless of `subject_hash`, to allow supervisor correction. Medical-officer VOID entries are distinguishable in the transparency log by role.
 3. `seq_num` must reference an existing, not-yet-voided entry. Voiding a VOID entry is rejected.
-4. VOID entries cannot void death entries (0x09, 0x0A). Death declarations are irrevocable at the applet level.
+4. VOID entries cannot void death entries (0x09, 0x0A). A PENDING declaration may be retracted via entry type 0x0C RETRACT_DECLARATION (requires ADR-0073); once DECEASED_CONFIRMED, the declaration is irrevocable.
 5. A voided entry remains in the log and is returned on read; the reader app displays it as superseded. No data is deleted.
 
 **Display rule for medic apps:** a voided entry is shown with a strikethrough or "VOIDED" marker, with the VOID entry's timestamp and reason. The original entry value is preserved and shown to allow audit.
+
+**Entry type 0x0C — RETRACT_DECLARATION**
+
+Retracts a PENDING death declaration, returning state to ALIVE. Only available while the death state is DECEASED_PENDING.
+
+**Applet enforcement:**
+1. Current death state must be DECEASED_PENDING. RETRACT_DECLARATION is rejected in ALIVE or DECEASED_CONFIRMED.
+2. Authorised if: (a) the RETRACT_DECLARATION entry's `subject_hash` matches the `subject_hash` of the original DEATH_DECLARATION entry in the log; or (b) the terminal cert carries the medical-officer role attribute (ADR-0069 §7).
+3. The RETRACT_DECLARATION entry is appended to the log; state reverts to ALIVE. The original DEATH_DECLARATION and RETRACT_DECLARATION entries remain in the log for audit.
+4. After a successful RETRACT_DECLARATION, a new DEATH_DECLARATION sequence may be initiated if the clinical situation warrants it.
+
+> **Requires ADR-0073** to formally amend ADR-0063 Decision 2 (state machine) with the DECEASED_PENDING → ALIVE transition.
 
 ---
 
@@ -227,4 +247,4 @@ The applet stores typed entries written by a medic. It does not compute drug int
 - **Timestamp epoch:** ~~enrollment vs deployment-start~~ **Resolved:** use enrollment timestamp. Simpler; avoids the complexity of distributing a deployment epoch to all terminals before the first append.
 - **Task C hold time target:** if measured worst-case hold time in Stage 0 exceeds 4 seconds, the total workflow (auth + UI) may need separate optimisation work before Gate 3.
 - ~~**Extended APDU confirmation:**~~ **Resolved** — command chaining mandated for death entry types (0x09, 0x0A) per Decision 1; extended APDUs are unreliable on low-end Android NFC controllers. ADR-0068 §6 to specify command chaining.
-- ~~**Memory budget amendment to ADR-0068:**~~ **Resolved** by ADR-0072 — log domain raised to 200 entries / 20 KB.
+- ~~**Memory budget amendment to ADR-0068:**~~ **Resolved** by ADR-0072 — log domain byte reservation raised to 20 KB (two-bucket byte cap: 14 KB common + 6 KB death-entry reserved; see Decision 1).

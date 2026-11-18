@@ -44,7 +44,7 @@ Enrollment transitions the applet from INSTALLED to PERSONALISED. All enrollment
 
 4. `SET MODE FLAG` — sovereign or consumer. Phase A: sovereign only (ADR-0067).
 
-5. `SET TRUST ANCHORS` — loads terminal CA certificate(s). Three roles per ADR-0064: (a) medic reader — Tier 1 + Tier 2 access; (b) enrollment terminal — write access; (c) revocation terminal — lock access.
+5. `SET TRUST ANCHORS` — loads terminal CA certificate(s). Four roles per ADR-0069 §7: (a) medic reader — Tier 1 + Tier 2 access + casualty log append; (b) enrollment terminal — write access; (c) revocation terminal — lock access; (d) medical officer — Tier 1 + Tier 2 access + VOID any log entry + RETRACT_DECLARATION.
 
 6. `WRITE TIER 1 DATA` — stores the emergency profile fields per ADR-0062 domain model: identity fields, medical summary, donor status (ADR-0025 currently Proposed; include field but mark optional until ADR-0025 is re-accepted).
 
@@ -127,7 +127,7 @@ Per ADR-0062 domain model and ADR-0063 death state machine.
 
 Per ADR-0005 (read caps) and ADR-0031 (receipt format).
 
-- **Tier 1 read counter:** incremented on each `READ TIER 1`. Cap set to 65,535 (effectively uncapped — a tag read 10×/day for 2 years reaches ~7,300 reads). Blocking Tier 1 emergency access on cap grounds is a direct P1 violation; the high cap resolves OQ-41. Cap reset requires enrollment terminal authentication.
+- **Tier 1 read counter:** incremented on each `READ TIER 1`. Per-cert-serial cap: 50 per cert serial (ADR-0069 §4), enforced — a captured phone cannot read more than 50 tags' Tier 1 data before the cert is exhausted. Total cap: Tier 1 reads are exempt from the 500-read total cap (a tag is never permanently locked out for emergency access). Counter saturates at 65,535 rather than refusing. Resolves OQ-41. Cap reset requires enrollment terminal authentication.
 - **Tier 2 read counter:** incremented on each `READ TIER 2`. Cap per ADR-0005 defaults: 500 total reads per tag; 50 per cert serial per ADR-0069 §4. Chip refuses Tier 2 reads beyond the per-cert or total cap. Cap reset requires enrollment terminal authentication.
 - **Receipt:** each read produces a chip-signed receipt: `hash(session_token || tier_data_hash || read_counter)`. Format per ADR-0031.
 - **Ratchet clock:** chip stores `max(notBefore)` of all validated terminal certificates seen — this establishes a time lower bound. **Rejection rule:** a presented certificate is rejected if `cert.notAfter < ratchet`. A cert whose `notAfter` falls before the lower bound has provably expired. (Note: the rejection rule uses `notAfter`, not `notBefore` — using `notBefore < ratchet` would incorrectly reject valid concurrent certificates issued on different dates.)
