@@ -24,7 +24,7 @@ Update the casualty log row in ADR-0068 §8 as follows:
 
 | Row | Old value | New value |
 |---|---|---|
-| Casualty log (cap model) | 50-entry count cap | 20 KB byte cap (~1,000 typical entries) |
+| Casualty log (cap model) | 50-entry count cap | 20 KB byte cap: 14 KB common (~700 entries) + 6 KB death-entry reserved |
 | Casualty log (memory reservation) | ~10 KB | ~20 KB |
 | **Total estimated** | **~19 KB** | **~29 KB** |
 

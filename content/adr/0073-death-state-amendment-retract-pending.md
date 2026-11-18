@@ -3,7 +3,7 @@
 - **Status:** Proposed
 - **Date:** 2026-11-18
 - **Principles:** P1, P9
-- **Amends:** ADR-0063 §6 (Decision 2 — state machine)
+- **Amends:** ADR-0063 Decision 2 (state machine)
 - **Caused by:** ADR-0071 (casualty log entry format — entry type 0x0C RETRACT_DECLARATION)
 
 ## Context

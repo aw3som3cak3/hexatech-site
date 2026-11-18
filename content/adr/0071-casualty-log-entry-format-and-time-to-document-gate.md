@@ -89,7 +89,7 @@ Common entries with event_time set: 12 + 4 + 1–5 = 17–21 bytes. At ~20 bytes
 
 Reserve **20 KB** for the log domain. The applet enforces a **two-bucket byte cap**:
 - **Common entries** (0x01–0x08, 0x0B, 0x0C): LOG_FULL when cumulative non-death bytes ≥ 14 KB.
-- **Death entries** (0x09, 0x0A): 6 KB reserved within the 20 KB total; LOG_FULL for death entries when cumulative death bytes ≥ 6 KB. This reserves space for two death entries (up to 3,084 bytes each) even when the common log is full.
+- **Death entries** (0x09, 0x0A): 6 KB reserved within the 20 KB total. **Retracted death entries do not count against this budget** — a 0x09 entry whose RETRACT_DECLARATION (0x0C) has been appended is excluded from the 6 KB count. This ensures a full retract-and-redeclare cycle (original 0x09 + 0x0C + new 0x09 + 0x0A, up to 4 × 3,084 ≈ 12 KB stored, 6 KB effective) is accommodated within the reserved space.
 
 This supersedes the single-bucket cap model (see ADR-0072). The P71D600 Flash NVM (up to 450 KB gross; 80–320 KB user-available depending on configuration) accommodates this alongside the emergency profile (~2–5 KB), identity domain (~4 KB), and system overhead.
 
@@ -100,7 +100,7 @@ The applet checks:
 2. Payload length matches the stated `payload_length` field (2 bytes).
 3. Byte cap check (two buckets):
    - Non-death entries (0x01–0x08, 0x0B, 0x0C): cumulative non-death bytes + this entry ≤ 14 KB.
-   - Death entries (0x09, 0x0A): cumulative death bytes + this entry ≤ 6 KB.
+   - Death entries (0x09, 0x0A): cumulative non-retracted death bytes + this entry ≤ 6 KB. A 0x09 entry that has an associated RETRACT_DECLARATION (0x0C) in the log is excluded from this count.
    LOG_FULL returned if the relevant bucket would overflow.
 4. For death entries (0x09, 0x0A): the death state machine preconditions are met per ADR-0063.
 5. Terminal is Tier 2 authenticated (medic PKI cert) per ADR-0069.
@@ -220,7 +220,7 @@ The applet stores typed entries written by a medic. It does not compute drug int
 **What becomes possible:**
 - ADR-0068 §6 "format TBD" is resolved; applet implementation can begin.
 - Stage 0 includes a formal time-to-document gate aligned with the operational evidence from IDF DCCS deployment.
-- The 20 KB byte-capped log accommodates ~1,000 typical entries, covering 72-hour prolonged field care scenarios (864 VITALS entries × 21 bytes ≈ 18 KB).
+- The 20 KB byte-capped log (14 KB common, 6 KB death-entry reserved) accommodates ~700 typical common entries — covering approximately 55–65 hours of PFC at vitals every 5 minutes. Death entries remain writable even when the common log is full.
 
 **What becomes harder:**
 - The closed-list values (drug codes, dose indices) must go through clinical review per ADR-0032 before the Phase A applet is finalised. This is a pre-start task for Track B in the PoC plan.
