@@ -14,4 +14,8 @@ JavaCard / eID-class secure element, passively powered over ISO 14443 NFC (centi
 Battery-less, durable, policy-enforcing. Requires NFC-capable readers (phones qualify).
 
 ## Alternatives considered
-UHF RFID (trackable at distance); active/battery tags (failure-prone, emitting).
+UHF RFID (trackable at distance); active/battery tags (failure-prone, emitting); contact-based flash cards (see Prior art below).
+
+## Prior art
+
+- [US Army Personal Information Carrier (PIC) programme, 1996–2017](../references/us-army-digital-dog-tag-history.md) — the US Army spent ~20 years and $34M+ attempting to field a digital dog tag, reaching ~13,500 troops in Iraq/Afghanistan by 2006. The programme died by attrition without a formal cancellation. The stated cause of failure at every stage: devices could not survive the combat zone. The structural cause: contact-based flash card design — physical insertion into a reader port. Ports fill with sand; connectors corrode. Passive NFC (no ports, no contacts, tap at 2–4 cm) directly addresses this failure mode. The US never built a contactless version; Hexa does.
